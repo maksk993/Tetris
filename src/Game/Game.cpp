@@ -11,15 +11,8 @@ Game::Game(GLFWwindow* _window, int width, int height) : window(_window), m_wind
     spawnZone_dx = (FIELD_WIDTH - SPAWNZONE_WIDTH) / 2;
     spawnZone_dy = FIELD_HEIGHT - SPAWNZONE_HEIGHT;
 
-    figuresArray[0] = Figure(Figures::O);
-    figuresArray[1] = Figure(Figures::L);
-    figuresArray[2] = Figure(Figures::J);
-    figuresArray[3] = Figure(Figures::S);
-    figuresArray[4] = Figure(Figures::Z);
-    figuresArray[5] = Figure(Figures::I);
-    figuresArray[6] = Figure(Figures::T);
-
-    textureMap["tex1"] = std::make_shared<Texture>("res/textures/kubiki.png");
+    textureMap[0] = std::make_shared<Texture>("res/textures/kubiki.png"); // style
+    textureMap[1] = std::make_shared<Texture>("res/textures/kubiki2.png"); // style
 
     start();
 }
@@ -38,7 +31,7 @@ void Game::run() {
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glEnable(GL_TEXTURE_2D);
     glVertexPointer(2, GL_FLOAT, 0, vertices);
-    textureMap["tex1"]->bind();
+    textureMap[tex]->bind(); // style
     
     int nextColor = genNextColor();
     int nextFigure = genNextFigure(nextColor);
@@ -48,7 +41,7 @@ void Game::run() {
     int delay = 400;
 
     while (!glfwWindowShouldClose(window)) {
-        glClearColor(0.5f, 0.8f, 0.5f, 1.0f);
+        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         if (gameOver) {
@@ -59,17 +52,17 @@ void Game::run() {
         clock.restart();
         timer += time;
 
+        if (timer > delay) {
+            handleKey(GLFW_KEY_DOWN, GLFW_PRESS);
+            timer = 0;
+        }
+
         if (shouldNewFigureBeSpawned) {
             deleteLines();
             spawnNextFigure(nextFigure, nextColor);
             nextColor = genNextColor();
             nextFigure = genNextFigure(nextColor);
             shouldNewFigureBeSpawned = false;
-        }
-
-        if (timer > delay) {
-            handleKey(GLFW_KEY_DOWN, GLFW_PRESS);
-            timer = 0;
         }
 
         glfwPollEvents();
@@ -145,6 +138,10 @@ void Game::handleKey(int key, int action) {
             return;
         }
     }
+    else if (key == GLFW_KEY_X && action == GLFW_PRESS) { // style
+        if (++tex > 1) tex = 0;
+        textureMap[tex]->bind();
+    }
 }
 
 void Game::showGame() {
@@ -198,7 +195,7 @@ int Game::genNextFigure(int color) {
 
     for (int i = 0; i < SPAWNZONE_HEIGHT; i++)
         for (int j = 0; j < SPAWNZONE_WIDTH; j++)
-            if (figuresArray[figure].figureCells[i][j]) {
+            if (figures[figure][i * 4 + j]) {
                 miniScreen[i][j].used = true;
                 miniScreen[i][j].color = color;
             }
@@ -216,7 +213,7 @@ void Game::spawnNextFigure(int figure, int color) {
         int y = i + spawnZone_dy;
         for (int j = 0; j < SPAWNZONE_WIDTH; j++) {
             int x = j + spawnZone_dx;
-            if (figuresArray[figure].figureCells[i][j]) {
+            if (figures[figure][i * 4 + j]) {
                 if (field[y][x].used) {
                     gameOver = true;
                     return;
@@ -227,10 +224,10 @@ void Game::spawnNextFigure(int figure, int color) {
             }
         }
     }
-    fallingFigureType = figuresArray[figure].type;
+    fallingFigureType = figure;
     fallingFigure_x1 = spawnZone_dx + 1;
     fallingFigure_y1 = spawnZone_dy - 1;
-    if (fallingFigureType == Figures::I) fallingFigure_x1 = spawnZone_dx, fallingFigure_y1 = spawnZone_dy - 2;
+    if (fallingFigureType == 5) fallingFigure_x1 = spawnZone_dx, fallingFigure_y1 = spawnZone_dy - 2; // figures[5] = 'I'
 
     fallingFigure_x2 = SPAWNZONE_WIDTH + spawnZone_dx;
     fallingFigure_y2 = SPAWNZONE_HEIGHT + spawnZone_dy;
@@ -245,14 +242,14 @@ bool Game::moveFigure(int x, int y, int dx, int dy) {
 }
 
 bool Game::rotateFigure() {
-    if (fallingFigureType == Figures::O) return true;
+    if (fallingFigureType == 0) return true; // figures[0] = 'O'
 
     if (fallingFigure_x1 < 0) handleKey(GLFW_KEY_RIGHT, GLFW_PRESS);
     if (fallingFigure_x2 > FIELD_WIDTH) handleKey(GLFW_KEY_LEFT, GLFW_PRESS);
 
     size_t matrixWidth = 3;
     size_t matrixHeigth = 3; 
-    if (fallingFigureType == Figures::I) matrixWidth = 4, matrixHeigth = 4;
+    if (fallingFigureType == 5) matrixWidth = 4, matrixHeigth = 4; // figures[5] = 'I'
 
     std::vector<std::vector<Cell>> CurrentMatrix(matrixHeigth, std::vector<Cell>(matrixWidth));
 

@@ -8,7 +8,6 @@
 #include <memory>
 #include <vector>
 
-#include "figures.hpp"
 #include "../Clock/Clock.hpp"
 #include "../graphics/Texture.hpp"
 //#include "../graphics/ShaderProgram.hpp"
@@ -52,8 +51,17 @@ class Game {
 
     int colorNum = 6;
     int figuresArraySize = 7;
-    Figure figuresArray[7];
-    Figures fallingFigureType;
+
+    bool figures[7][8]{
+        {0, 1, 1, 0, 0, 1, 1, 0}, // O
+        {0, 1, 1, 1, 0, 0, 0, 1}, // L
+        {0, 1, 1, 1, 0, 1, 0, 0}, // J
+        {0, 1, 1, 0, 0, 0, 1, 1}, // S
+        {0, 0, 1, 1, 0, 1, 1, 0}, // Z
+        {1, 1, 1, 1, 0, 0, 0, 0}, // I
+        {0, 1, 1, 1, 0, 0, 1, 0} // T
+    };
+    int fallingFigureType;
 
     bool shouldNewFigureBeSpawned;
     bool gameOver;
@@ -64,7 +72,8 @@ class Game {
     int fallingFigure_y2 = 0;
 
    // std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> shaderProgramMap;
-    std::unordered_map<std::string, std::shared_ptr<Texture>> textureMap;
+    std::unordered_map<int, std::shared_ptr<Texture>> textureMap;
+    int tex = 1;
    // std::unordered_map<std::string, std::shared_ptr<Sprite>> spriteMap;
 
     void start();
