@@ -42,11 +42,22 @@ void Game::run() {
     
     int nextColor = genNextColor();
     int nextFigure = genNextFigure(nextColor);
-    std::chrono::milliseconds interval(250);
+
+    Clock clock;
+    float timer = 0.f;
+    int delay = 400;
 
     while (!glfwWindowShouldClose(window)) {
         glClearColor(0.5f, 0.8f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        if (gameOver) {
+            start();
+        }
+
+        float time = clock.getElapsedTime();
+        clock.restart();
+        timer += time;
 
         if (shouldNewFigureBeSpawned) {
             deleteLines();
@@ -55,21 +66,10 @@ void Game::run() {
             nextFigure = genNextFigure(nextColor);
             shouldNewFigureBeSpawned = false;
         }
-        else {
-            auto start = std::chrono::steady_clock::now();
 
+        if (timer > delay) {
             handleKey(GLFW_KEY_DOWN, GLFW_PRESS);
-
-            auto end = std::chrono::steady_clock::now();
-            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-
-            if (elapsed < interval) {
-                std::this_thread::sleep_for(interval - elapsed);
-            }
-        }
-
-        if (gameOver) {
-            start();
+            timer = 0;
         }
 
         glfwPollEvents();

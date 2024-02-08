@@ -7,10 +7,9 @@
 #include <unordered_map>
 #include <memory>
 #include <vector>
-#include <chrono>
-#include <thread>
 
 #include "figures.hpp"
+#include "../Clock/Clock.hpp"
 #include "../graphics/Texture.hpp"
 //#include "../graphics/ShaderProgram.hpp"
 //#include "../graphics/Sprite.hpp"

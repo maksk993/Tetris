@@ -7,16 +7,12 @@ set(CMAKE_CXX_STANDARD 11)
 
 add_executable(${PROJECT_NAME} 
 	"src/main.cpp"
-	"src/Game/Game.hpp"
 	"src/Game/Game.cpp"
 	#"src/graphics/IGraphics.hpp"
-	#"src/graphics/ShaderProgram.hpp"
 	#"src/graphics/ShaderProgram.cpp" 
-	"src/graphics/stb_image.h" 
-	"src/graphics/Texture.hpp" 
 	"src/graphics/Texture.cpp" 
-	#"src/graphics/Sprite.hpp"
 	#"src/graphics/Sprite.cpp"
+	"src/Clock/Clock.cpp"
 )
 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
