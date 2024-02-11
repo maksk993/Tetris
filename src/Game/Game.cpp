@@ -246,6 +246,14 @@ bool Game::rotateFigure() {
 
     if (fallingFigure_x1 < 0) handleKey(GLFW_KEY_RIGHT, GLFW_PRESS);
     if (fallingFigure_x2 > FIELD_WIDTH) handleKey(GLFW_KEY_LEFT, GLFW_PRESS);
+    for (int i = fallingFigure_y1; i < fallingFigure_y2; i++) {
+        if (field[i][fallingFigure_x2 - 1].used && !field[i][fallingFigure_x2 - 1].canMove)
+            handleKey(GLFW_KEY_LEFT, GLFW_PRESS);
+    }
+    for (int i = fallingFigure_y1; i < fallingFigure_y2; i++) {
+        if (field[i][fallingFigure_x1].used && !field[i][fallingFigure_x1].canMove)
+            handleKey(GLFW_KEY_RIGHT, GLFW_PRESS);
+    }
 
     size_t matrixWidth = 3;
     size_t matrixHeigth = 3; 
@@ -260,16 +268,16 @@ bool Game::rotateFigure() {
         }
     }
 
-    std::vector<std::vector<Cell>> TransposedMatrix(matrixWidth, std::vector<Cell>(matrixHeigth));
+    std::vector<std::vector<Cell>> RotatedMatrix(matrixWidth, std::vector<Cell>(matrixHeigth));
 
     for (int i = 0; i < matrixWidth; i++)
         for (int j = 0; j < matrixHeigth; j++)
-            TransposedMatrix[i][j] = CurrentMatrix[j][matrixWidth - i - 1];
+            RotatedMatrix[i][j] = CurrentMatrix[j][matrixWidth - i - 1];
 
-    for (int i = fallingFigure_y1, t_i = 0; t_i < matrixHeigth; i++, t_i++) {
-        for (int j = fallingFigure_x1, t_j = 0; t_j < matrixWidth; j++, t_j++) {
+    for (int i = fallingFigure_y1, r_i = 0; r_i < matrixHeigth; i++, r_i++) {
+        for (int j = fallingFigure_x1, r_j = 0; r_j < matrixWidth; j++, r_j++) {
             if ((field[i][j].used && !field[i][j].canMove) || (j < 0 || j >= FIELD_WIDTH || i < 0)) return false;
-            field[i][j] = TransposedMatrix[t_i][t_j];
+            field[i][j] = RotatedMatrix[r_i][r_j];
         }
     }
 
