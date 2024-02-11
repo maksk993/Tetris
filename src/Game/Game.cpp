@@ -227,7 +227,7 @@ void Game::spawnNextFigure(int figure, int color) {
     fallingFigureType = figure;
     fallingFigure_x1 = spawnZone_dx + 1;
     fallingFigure_y1 = spawnZone_dy - 1;
-    if (fallingFigureType == 5) fallingFigure_x1 = spawnZone_dx, fallingFigure_y1 = spawnZone_dy - 2; // figures[5] = 'I'
+    if (fallingFigureType == 5) fallingFigure_x1 = spawnZone_dx, fallingFigure_y1 = spawnZone_dy - 2; // figures[5] == 'I'
 
     fallingFigure_x2 = SPAWNZONE_WIDTH + spawnZone_dx;
     fallingFigure_y2 = SPAWNZONE_HEIGHT + spawnZone_dy;
@@ -242,14 +242,14 @@ bool Game::moveFigure(int x, int y, int dx, int dy) {
 }
 
 bool Game::rotateFigure() {
-    if (fallingFigureType == 0) return true; // figures[0] = 'O'
+    if (fallingFigureType == 0) return true; // figures[0] == 'O'
 
     if (fallingFigure_x1 < 0) handleKey(GLFW_KEY_RIGHT, GLFW_PRESS);
     if (fallingFigure_x2 > FIELD_WIDTH) handleKey(GLFW_KEY_LEFT, GLFW_PRESS);
 
     size_t matrixWidth = 3;
     size_t matrixHeigth = 3; 
-    if (fallingFigureType == 5) matrixWidth = 4, matrixHeigth = 4; // figures[5] = 'I'
+    if (fallingFigureType == 5) matrixWidth = 4, matrixHeigth = 4; // figures[5] == 'I'
 
     std::vector<std::vector<Cell>> CurrentMatrix(matrixHeigth, std::vector<Cell>(matrixWidth));
 
