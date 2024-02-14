@@ -2,6 +2,3 @@ out/
 .vs/
 CMakePresets.json
 res/highScore.txt
-res/textures/kubiki_old.png
-src/graphics/Texture2.cpp
-src/graphics/Texture2.hpp
