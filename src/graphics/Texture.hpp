@@ -2,13 +2,10 @@
 #ifndef __TEXTURE_HPP__
 #define __TEXTURE_HPP__
 
-#include <glad/glad.h>
-#include <iostream>
-#include <string>
-
+#include "IGraphics.hpp"
 #include "stb_image.h"
 
-class Texture {
+class Texture : public IGraphics { // Работа с текстурами
 public:
 	Texture(const std::string& texturePath,
         const unsigned int channels = 4,
@@ -23,7 +20,7 @@ public:
     Texture(Texture&&) noexcept;
     Texture& operator=(Texture&&) noexcept;
 
-    GLuint getID() const;
+    virtual GLuint getID() const override;
     void bind() const;
 
 private:
@@ -31,12 +28,10 @@ private:
     GLenum m_wrapmode;
     GLenum m_mode;
 
-    GLuint m_ID;
+    unsigned int m_windowWidth;
+    unsigned int m_windowHeight;
 
-    unsigned int m_width;
-    unsigned int m_height;
-
-    std::string load(const std::string& path);
+    virtual std::string load(const std::string& path) override;
     void createTexture(const unsigned int channels, const unsigned char* pixels);
 };
 

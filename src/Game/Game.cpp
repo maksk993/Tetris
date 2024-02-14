@@ -1,18 +1,47 @@
 ﻿#include "Game.hpp"
 
-//#include <glm/mat4x4.hpp>
-//#include <glm/gtc/matrix_transform.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 Game::Game(GLFWwindow* _window, int width, int height) : window(_window), m_windowWidth(width), m_windowHeight(height) {
     glfwSetWindowUserPointer(window, this);
     glfwSetKeyCallback(window, keysCallback);
+    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
     srand(time(NULL));
 
-    spawnZone_dx = (FIELD_WIDTH - SPAWNZONE_WIDTH) / 2;
-    spawnZone_dy = FIELD_HEIGHT - SPAWNZONE_HEIGHT;
+    textureMap["cell"] = std::make_shared<Texture>("res/textures/cells.png");
+    textureMap["score"] = std::make_shared<Texture>("res/textures/score400x100.png");
+    textureMap["highScore"] = std::make_shared<Texture>("res/textures/highScore400x60.png");
+    textureMap["numbers"] = std::make_shared<Texture>("res/textures/numbers400x60.png");
 
-    textureMap[0] = std::make_shared<Texture>("res/textures/kubiki.png"); // style
-    textureMap[1] = std::make_shared<Texture>("res/textures/kubiki2.png"); // style
+    shaderProgramMap["sprite"] = std::make_shared<ShaderProgram>("res/shaders/vSprite.txt",
+                                                                "res/shaders/fSprite.txt");
+
+    for (int i = 0; i < cellTexturesArray.size(); i++) {
+        cellSpriteMap[i] = std::make_shared<Sprite>(textureMap["cell"], shaderProgramMap["sprite"],
+        glm::vec2(0.f), glm::vec2(m_windowWidth_1_20), 0.f, cellTexturesArray[i]);
+    }
+    
+    for (int i = 0; i < numbersTexturesArray.size(); i++) {
+        numbersSpriteMap[i] = std::make_shared<Sprite>(textureMap["numbers"], shaderProgramMap["sprite"],
+            glm::vec2(0.f), glm::vec2(m_windowWidth_1_27, m_windowHeight / 18), 0.f, numbersTexturesArray[i]);
+        numbersSpriteMap[i + numbersTexturesArray.size()] = std::make_shared<Sprite>(textureMap["numbers"], shaderProgramMap["sprite"],
+            glm::vec2(0.f), glm::vec2(m_windowWidth_1_40, m_windowWidth_1_27), 0.f, numbersTexturesArray[i]);
+    }
+
+    cellSpriteMap[-1] = std::make_shared<Sprite>(textureMap["score"], shaderProgramMap["sprite"],
+        glm::vec2(13 * m_windowWidth_1_20, m_windowWidth_19_20 - 2 * m_windowWidth_1_20), glm::vec2(m_windowWidth_1_4, m_windowHeight / 16), 0.f);
+    cellSpriteMap[-2] = std::make_shared<Sprite>(textureMap["highScore"], shaderProgramMap["sprite"],
+        glm::vec2(m_windowWidth_1_2 + m_windowWidth_1_20, m_windowWidth_19_20), glm::vec2(m_windowWidth_1_4, m_windowWidth_1_27), 0.f);
+
+    std::ifstream highScoreFile("res/highScore.txt");
+    if (!highScoreFile.is_open()) {
+        std::cerr << "Failed to open file: res/highScore.txt" << std::endl;
+        exit(1);
+    }
+    highScoreFile >> highScore;
+    highScoreStr = std::to_string(highScore);
+    highScoreFile.close();
 
     start();
 }
@@ -24,29 +53,32 @@ void Game::start() {
 
     gameOver = false;
     shouldNewFigureBeSpawned = true;
+    score = 0;
 }
 
 void Game::run() {
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glEnable(GL_TEXTURE_2D);
-    glVertexPointer(2, GL_FLOAT, 0, vertices);
-    textureMap[tex]->bind(); // style
-    
+    shaderProgramMap["sprite"]->use();
+    shaderProgramMap["sprite"]->setInt("tex", 0);
+
+    glm::mat4 projectionMatrix = glm::ortho(0.f, static_cast<float>(m_windowWidth), 0.f, static_cast<float>(m_windowHeight),
+                                           -1.f, 1.f);
+    shaderProgramMap["sprite"]->setMatrix4("projectionMat", projectionMatrix);
+
+    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     int nextColor = genNextColor();
     int nextFigure = genNextFigure(nextColor);
 
     Clock clock;
     float timer = 0.f;
     int delay = 400;
-
+    
     while (!glfwWindowShouldClose(window)) {
-        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
         if (gameOver) {
             start();
         }
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glfwPollEvents();
 
         float time = clock.getElapsedTime();
         clock.restart();
@@ -65,19 +97,18 @@ void Game::run() {
             shouldNewFigureBeSpawned = false;
         }
 
-        glfwPollEvents();
         showGame();
         glfwSwapBuffers(window);
     }
-
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_TEXTURE_2D_ARRAY);
-    glDisable(GL_TEXTURE_2D);
 }
 
 void Game::keysCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     Game* game = static_cast<Game*>(glfwGetWindowUserPointer(window));
     game->handleKey(key, action);
+}
+
+void Game::framebufferSizeCallback(GLFWwindow* window, int width, int height) {
+    glViewport(0, 0, width, height);
 }
 
 void Game::handleKey(int key, int action) {
@@ -86,7 +117,7 @@ void Game::handleKey(int key, int action) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
-    else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
+    else if (key == GLFW_KEY_DOWN && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
         for (int i = 0; i < FIELD_HEIGHT; i++) {
             for (int j = 0; j < FIELD_WIDTH; j++) {
                 if (field[i][j].canMove)
@@ -138,60 +169,68 @@ void Game::handleKey(int key, int action) {
             return;
         }
     }
-    else if (key == GLFW_KEY_X && action == GLFW_PRESS) { // style
-        if (++tex > 1) tex = 0;
-        textureMap[tex]->bind();
-    }
 }
 
 void Game::showGame() {
-    glLoadIdentity();
-    glScalef(2.f / FIELD_HEIGHT, 2.f / FIELD_HEIGHT, 1.f);
-    glTranslatef(-FIELD_HEIGHT * 0.5f, -FIELD_HEIGHT * 0.5f, 0.f);
-
-    for (size_t i = 0; i < FIELD_HEIGHT; i++) {
+    for (size_t i = 0; i < FIELD_HEIGHT; i++) { // shows field
         for (size_t j = 0; j < FIELD_WIDTH; j++) {
-            glPushMatrix();
-            glTranslatef(j, i, 0.0f);
-
-            if (field[i][j].used) {
-                showCell(true, field[i][j].color);
-            }
-            else {
-                showCell(false);
-            }
-
-            glPopMatrix();
+            cellSpriteMap[field[i][j].color]->setPosition(glm::vec2(j * m_windowWidth_1_20, i * m_windowWidth_1_20));
+            cellSpriteMap[field[i][j].color]->render();
         }
     }
 
-    glTranslatef(FIELD_WIDTH + 3, FIELD_WIDTH + 2, 0);
-
-    for (size_t i = 0; i < SPAWNZONE_HEIGHT; i++) {
+    for (size_t i = 0; i < SPAWNZONE_HEIGHT; i++) { // shows mini screen
         for (size_t j = 0; j < SPAWNZONE_WIDTH; j++) {
-            glPushMatrix();
-            glTranslatef(j, i, 0.0f);
-
-            if (miniScreen[i][j].used)
-                showCell(true, miniScreen[i][j].color);
-            else {
-                showCell(false);
-            }
-
-            glPopMatrix();
+            cellSpriteMap[miniScreen[i][j].color]->setPosition(glm::vec2(j * m_windowWidth_1_20 + (FIELD_WIDTH + 3) * m_windowWidth_1_20,
+                                                                         i * m_windowWidth_1_20 + (FIELD_WIDTH + 2) * m_windowWidth_1_20));
+            cellSpriteMap[miniScreen[i][j].color]->render();
         }
     }
+
+    showScore(); // shows score
 }
 
-void Game::showCell(bool isUsed, int color) {
-    if (isUsed) glTexCoordPointer(2, GL_FLOAT, 0, texCoord + 8 * color);
-    else glTexCoordPointer(2, GL_FLOAT, 0, texCoord);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+void Game::showScore() {
+    cellSpriteMap[-1]->render();
+    cellSpriteMap[-2]->render();
+
+    if (score > highScore) writeNewHighScore();
+
+    std::string scoreStr = std::to_string(score);
+    float dx = m_windowWidth_1_27;
+    
+    for (char& c : scoreStr) {
+        int num = c - '0';
+        numbersSpriteMap[num]->setPosition(glm::vec2(m_windowWidth_5_8 + dx, m_windowWidth_3_4));
+        numbersSpriteMap[num]->render();
+        dx += m_windowWidth_1_27;
+    }
+
+    dx = m_windowWidth_1_20;
+    for (char& c : highScoreStr) {
+        int num = c - '0';
+        numbersSpriteMap[num + numbersTexturesArray.size()]->setPosition(glm::vec2(m_windowWidth_3_4 + dx, m_windowWidth_19_20));
+        numbersSpriteMap[num + numbersTexturesArray.size()]->render();
+        dx += m_windowWidth_1_40;
+    }
+}
+ 
+void Game::writeNewHighScore() {
+    highScore = score;
+    highScoreStr = std::to_string(highScore);
+
+    std::ofstream highScoreFile("res/highScore.txt", std::ios::trunc);
+    if (!highScoreFile.is_open()) {
+        std::cerr << "Failed to open file: res/highScore.txt" << std::endl;
+        exit(1);
+    }
+    highScoreFile << highScore;
+    highScoreFile.close();
 }
 
 int Game::genNextFigure(int color) {
     std::memset(miniScreen, 0, sizeof(miniScreen));
-    int figure = rand() % figuresArraySize;
+    int figure = rand() % figures.size();
 
     for (int i = 0; i < SPAWNZONE_HEIGHT; i++)
         for (int j = 0; j < SPAWNZONE_WIDTH; j++)
@@ -204,7 +243,7 @@ int Game::genNextFigure(int color) {
 }
 
 int Game::genNextColor() {
-    int color = rand() % colorNum + 1;
+    int color = rand() % numberOfColors + 1;
     return color;
 }
 
@@ -307,6 +346,7 @@ void Game::moveAllFiguresDownFrom(int y) {
 }
 
 void Game::deleteLines() {
+    int scoreMultiplier = 1;
     for (int i = 0; i < FIELD_HEIGHT; i++) {
         bool shouldLineBeDeleted = true;
         for (int j = 0; j < FIELD_WIDTH; j++) {
@@ -321,6 +361,7 @@ void Game::deleteLines() {
                 field[i][j].color = 0;
             }
             moveAllFiguresDownFrom(i-- + 1);
+            score += scorePerLine * scoreMultiplier++;
         }
     }   
 }

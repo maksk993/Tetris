@@ -4,7 +4,6 @@
 #define STBI_ONLY_PNG
 
 #include "Game/Game.hpp"
-//#include <glm/vec2.hpp>
 
 int main() {
     if (!glfwInit()) {
@@ -12,11 +11,9 @@ int main() {
         return -1;
     }
 
-    //glm::ivec2 windowSize(800, 800);
-    int windowWidth = 800;
-    int windowHeigth = 800;
+    glm::vec2 windowSize(800, 800);
 
-    GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeigth, "Tetris", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(windowSize.x, windowSize.y, "Tetris", nullptr, nullptr);
 
     if (!window) {
         std::cerr << "Failed to create window" << std::endl;
@@ -32,7 +29,7 @@ int main() {
         return -1;
     }
 
-    Game game(window, windowWidth, windowHeigth);
+    Game game(window, windowSize.x, windowSize.y);
 
     game.run();
 

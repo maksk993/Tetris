@@ -7,23 +7,35 @@
 #include <unordered_map>
 #include <memory>
 #include <vector>
+#include <array>
+#include <fstream>
 
 #include "../Clock/Clock.hpp"
 #include "../graphics/Texture.hpp"
-//#include "../graphics/ShaderProgram.hpp"
-//#include "../graphics/Sprite.hpp"
+#include "../graphics/ShaderProgram.hpp"
+#include "../graphics/Sprite.hpp"
 
 class Game {
     GLFWwindow* window;
-    int m_windowWidth;
-    int m_windowHeight;
+    const unsigned int m_windowWidth;
+    const unsigned int m_windowHeight;
+
+    const float m_windowWidth_1_8 = m_windowWidth / 8;
+    const float m_windowWidth_5_8 = m_windowWidth_1_8 * 5;
+    const float m_windowWidth_1_4 = m_windowWidth / 4;
+    const float m_windowWidth_1_2 = m_windowWidth / 2;
+    const float m_windowWidth_3_4 = m_windowWidth_1_4 * 3;
+    const float m_windowWidth_1_20 = m_windowWidth / 20;
+    const float m_windowWidth_19_20 = m_windowWidth - m_windowWidth_1_20;
+    const float m_windowWidth_1_27 = m_windowWidth / 27;
+    const float m_windowWidth_1_40 = m_windowWidth / 40;
 
     static const int FIELD_WIDTH = 10;
     static const int FIELD_HEIGHT = 20;
     static const int SPAWNZONE_WIDTH = 4;
     static const int SPAWNZONE_HEIGHT = 2;
-    int spawnZone_dx;
-    int spawnZone_dy;
+    const int spawnZone_dx = (FIELD_WIDTH - SPAWNZONE_WIDTH) / 2;
+    const int spawnZone_dy = FIELD_HEIGHT - SPAWNZONE_HEIGHT;
 
     struct Cell {
         bool used;
@@ -33,26 +45,32 @@ class Game {
 
     Cell field[FIELD_HEIGHT][FIELD_WIDTH];
     Cell previousField[FIELD_HEIGHT][FIELD_WIDTH];
-    Cell miniScreen[2][4];
+    Cell miniScreen[SPAWNZONE_HEIGHT][SPAWNZONE_WIDTH];
 
-    GLfloat vertices[8] = {
-        0.f, 0.f,   1.f, 0.f,   1.f, 1.f,   0.f, 1.f
-    };
+    std::array<std::array<GLfloat, 8>, 7> cellTexturesArray = { {
+        {0.f, 0.f,   1.f / 7, 0.f,   1.f / 7, 1.f,   0.f, 1.f},
+        {1.f / 7, 0.f,   2.f / 7, 0.f,   2.f / 7, 1.f,   1.f / 7, 1.f},
+        {2.f / 7, 0.f,   3.f / 7, 0.f,   3.f / 7, 1.f,   2.f / 7, 1.f},
+        {3.f / 7, 0.f,   4.f / 7, 0.f,   4.f / 7, 1.f,   3.f / 7, 1.f},
+        {4.f / 7, 0.f,   5.f / 7, 0.f,   5.f / 7, 1.f,   4.f / 7, 1.f},
+        {5.f / 7, 0.f,   6.f / 7, 0.f,   6.f / 7, 1.f,   5.f / 7, 1.f},
+        {6.f / 7, 0.f,   1.f, 0.f,   1.f, 1.f,   6.f / 7, 1.f}
+    } };
 
-    GLfloat texCoord[56] = {
-        0.f, 0.f,   1.f/7, 0.f,   1.f/7, 1.f,   0.f, 1.f,
-        1.f/7, 0.f,   2.f/7, 0.f,   2.f/7, 1.f,   1.f/7, 1.f,
-        2.f/7, 0.f,   3.f/7, 0.f,   3.f/7, 1.f,   2.f/7, 1.f,
-        3.f/7, 0.f,   4.f/7, 0.f,   4.f/7, 1.f,   3.f/7, 1.f,
-        4.f/7, 0.f,   5.f/7, 0.f,   5.f/7, 1.f,   4.f/7, 1.f,
-        5.f/7, 0.f,   6.f/7, 0.f,   6.f/7, 1.f,   5.f/7, 1.f,
-        6.f/7, 0.f,   1.f, 0.f,   1.f, 1.f,   6.f/7, 1.f,
-    };
+    std::array<std::array<GLfloat, 8>, 10> numbersTexturesArray = { {
+        {0.f, 0.f,   0.1f, 0.f,   0.1f, 1.f,   0.f, 1.f},
+        {0.1f, 0.f,   0.2f, 0.f,   0.2f, 1.f,   0.1f, 1.f},
+        {0.2f, 0.f,   0.3f, 0.f,   0.3f, 1.f,   0.2f, 1.f},
+        {0.3f, 0.f,   0.4f, 0.f,   0.4f, 1.f,   0.3f, 1.f},
+        {0.4f, 0.f,   0.5f, 0.f,   0.5f, 1.f,   0.4f, 1.f},
+        {0.5f, 0.f,   0.6f, 0.f,   0.6f, 1.f,   0.5f, 1.f},
+        {0.6f, 0.f,   0.7f, 0.f,   0.7f, 1.f,   0.6f, 1.f},
+        {0.7f, 0.f,   0.8f, 0.f,   0.8f, 1.f,   0.7f, 1.f},
+        {0.8f, 0.f,   0.9f, 0.f,   0.9f, 1.f,   0.8f, 1.f},
+        {0.9f, 0.f,   1.f, 0.f,   1.f, 1.f,   0.9f, 1.f}
+    } };
 
-    int colorNum = 6;
-    int figuresArraySize = 7;
-
-    bool figures[7][8]{
+    std::array<std::array<bool, 8>, 7> figures = { {
         {0, 1, 1, 0, 0, 1, 1, 0}, // O
         {0, 1, 1, 1, 0, 0, 0, 1}, // L
         {0, 1, 1, 1, 0, 1, 0, 0}, // J
@@ -60,27 +78,35 @@ class Game {
         {0, 0, 1, 1, 0, 1, 1, 0}, // Z
         {1, 1, 1, 1, 0, 0, 0, 0}, // I
         {0, 1, 1, 1, 0, 0, 1, 0} // T
-    };
-    int fallingFigureType;
+    } };
+    size_t fallingFigureType;
+    size_t numberOfColors = 6;
 
     bool shouldNewFigureBeSpawned;
     bool gameOver;
+
+    unsigned int highScore;
+    std::string highScoreStr;
+    unsigned int score;
+    unsigned int scorePerLine = 100;
 
     int fallingFigure_x1 = 0;
     int fallingFigure_y1 = 0;
     int fallingFigure_x2 = 0;
     int fallingFigure_y2 = 0;
 
-   // std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> shaderProgramMap;
-    std::unordered_map<int, std::shared_ptr<Texture>> textureMap;
-    int tex = 1;
-   // std::unordered_map<std::string, std::shared_ptr<Sprite>> spriteMap;
+    std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> shaderProgramMap;
+    std::unordered_map<std::string, std::shared_ptr<Texture>> textureMap;
+    std::unordered_map<int, std::shared_ptr<Sprite>> cellSpriteMap;
+    std::unordered_map<int, std::shared_ptr<Sprite>> numbersSpriteMap;
 
     void start();
     static void keysCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+    static void framebufferSizeCallback(GLFWwindow* window, int width, int height);
     void handleKey(int key, int action);
     void showGame();
-    void showCell(bool isUsed, int color = 0);
+    void showScore();
+    void writeNewHighScore();
     int genNextFigure(int color);
     int genNextColor();
     void spawnNextFigure(int figure, int color);
