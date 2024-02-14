@@ -20,15 +20,17 @@ class Game {
     const unsigned int m_windowWidth;
     const unsigned int m_windowHeight;
 
-    const float m_windowWidth_1_8 = m_windowWidth / 8;
-    const float m_windowWidth_5_8 = m_windowWidth_1_8 * 5;
-    const float m_windowWidth_1_4 = m_windowWidth / 4;
-    const float m_windowWidth_1_2 = m_windowWidth / 2;
-    const float m_windowWidth_3_4 = m_windowWidth_1_4 * 3;
+    const float m_windowWidth_1_2 = m_windowWidth >> 1;
+    const float m_windowWidth_1_4 = m_windowWidth >> 2;
+    const float m_windowWidth_1_8 = m_windowWidth >> 3;
+    const float m_windowWidth_1_18 = m_windowWidth / 18;
     const float m_windowWidth_1_20 = m_windowWidth / 20;
-    const float m_windowWidth_19_20 = m_windowWidth - m_windowWidth_1_20;
-    const float m_windowWidth_1_27 = m_windowWidth / 27;
     const float m_windowWidth_1_40 = m_windowWidth / 40;
+    const float m_windowWidth_3_4 = m_windowWidth_1_2 + m_windowWidth_1_4;
+    const float m_windowWidth_5_8 = m_windowWidth_1_2 + m_windowWidth_1_8;
+    const float m_windowWidth_7_8 = m_windowWidth_5_8 + m_windowWidth_1_4;
+    const float m_windowWidth_17_20 = m_windowWidth - m_windowWidth_1_8 - m_windowWidth_1_40;
+    const float m_windowWidth_19_20 = m_windowWidth - m_windowWidth_1_20;
 
     static const int FIELD_WIDTH = 10;
     static const int FIELD_HEIGHT = 20;

@@ -10,9 +10,8 @@ Game::Game(GLFWwindow* _window, int width, int height) : window(_window), m_wind
     srand(time(NULL));
 
     textureMap["cell"] = std::make_shared<Texture>("res/textures/cells.png");
-    textureMap["score"] = std::make_shared<Texture>("res/textures/score400x100.png");
-    textureMap["highScore"] = std::make_shared<Texture>("res/textures/highScore400x60.png");
-    textureMap["numbers"] = std::make_shared<Texture>("res/textures/numbers400x60.png");
+    textureMap["interface"] = std::make_shared<Texture>("res/textures/interface400x800.png");
+    textureMap["numbers"] = std::make_shared<Texture>("res/textures/numbers400x46.png");
 
     shaderProgramMap["sprite"] = std::make_shared<ShaderProgram>("res/shaders/vSprite.txt",
                                                                 "res/shaders/fSprite.txt");
@@ -24,15 +23,13 @@ Game::Game(GLFWwindow* _window, int width, int height) : window(_window), m_wind
     
     for (int i = 0; i < numbersTexturesArray.size(); i++) {
         numbersSpriteMap[i] = std::make_shared<Sprite>(textureMap["numbers"], shaderProgramMap["sprite"],
-            glm::vec2(0.f), glm::vec2(m_windowWidth_1_27, m_windowHeight / 18), 0.f, numbersTexturesArray[i]);
+            glm::vec2(0.f), glm::vec2(m_windowWidth_1_20, m_windowWidth_1_18), 0.f, numbersTexturesArray[i]);
         numbersSpriteMap[i + numbersTexturesArray.size()] = std::make_shared<Sprite>(textureMap["numbers"], shaderProgramMap["sprite"],
-            glm::vec2(0.f), glm::vec2(m_windowWidth_1_40, m_windowWidth_1_27), 0.f, numbersTexturesArray[i]);
+            glm::vec2(0.f), glm::vec2(m_windowWidth_1_40, m_windowWidth_1_18 / 2), 0.f, numbersTexturesArray[i]);
     }
 
-    cellSpriteMap[-1] = std::make_shared<Sprite>(textureMap["score"], shaderProgramMap["sprite"],
-        glm::vec2(13 * m_windowWidth_1_20, m_windowWidth_19_20 - 2 * m_windowWidth_1_20), glm::vec2(m_windowWidth_1_4, m_windowHeight / 16), 0.f);
-    cellSpriteMap[-2] = std::make_shared<Sprite>(textureMap["highScore"], shaderProgramMap["sprite"],
-        glm::vec2(m_windowWidth_1_2 + m_windowWidth_1_20, m_windowWidth_19_20), glm::vec2(m_windowWidth_1_4, m_windowWidth_1_27), 0.f);
+    numbersSpriteMap[-1] = std::make_shared<Sprite>(textureMap["interface"], shaderProgramMap["sprite"],
+        glm::vec2(m_windowWidth_1_2, 0.f), glm::vec2(m_windowWidth_1_2, m_windowHeight), 0.f);
 
     std::ifstream highScoreFile("res/highScore.txt");
     if (!highScoreFile.is_open()) {
@@ -179,6 +176,8 @@ void Game::showGame() {
         }
     }
 
+    showScore(); // shows score
+
     for (size_t i = 0; i < SPAWNZONE_HEIGHT; i++) { // shows mini screen
         for (size_t j = 0; j < SPAWNZONE_WIDTH; j++) {
             cellSpriteMap[miniScreen[i][j].color]->setPosition(glm::vec2(j * m_windowWidth_1_20 + (FIELD_WIDTH + 3) * m_windowWidth_1_20,
@@ -186,30 +185,26 @@ void Game::showGame() {
             cellSpriteMap[miniScreen[i][j].color]->render();
         }
     }
-
-    showScore(); // shows score
 }
 
 void Game::showScore() {
-    cellSpriteMap[-1]->render();
-    cellSpriteMap[-2]->render();
-
+    numbersSpriteMap[-1]->render();
     if (score > highScore) writeNewHighScore();
 
     std::string scoreStr = std::to_string(score);
-    float dx = m_windowWidth_1_27;
+    float dx = 0.f;
     
     for (char& c : scoreStr) {
         int num = c - '0';
         numbersSpriteMap[num]->setPosition(glm::vec2(m_windowWidth_5_8 + dx, m_windowWidth_3_4));
         numbersSpriteMap[num]->render();
-        dx += m_windowWidth_1_27;
+        dx += m_windowWidth_1_20;
     }
 
-    dx = m_windowWidth_1_20;
+    dx = 0.f;
     for (char& c : highScoreStr) {
         int num = c - '0';
-        numbersSpriteMap[num + numbersTexturesArray.size()]->setPosition(glm::vec2(m_windowWidth_3_4 + dx, m_windowWidth_19_20));
+        numbersSpriteMap[num + numbersTexturesArray.size()]->setPosition(glm::vec2(m_windowWidth_17_20 + dx, m_windowWidth_19_20));
         numbersSpriteMap[num + numbersTexturesArray.size()]->render();
         dx += m_windowWidth_1_40;
     }
