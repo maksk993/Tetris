@@ -3,7 +3,7 @@
 Для сборки проекта нужны git и cmake:
 ```
 git clone https://github.com/maksk993/Tetris.git
-cd 2048
+cd Tetris
 mkdir build
 cd build
 cmake ..
