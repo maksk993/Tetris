@@ -8,9 +8,9 @@
 #include <memory>
 #include <vector>
 #include <array>
-#include <fstream>
 
-#include "../Clock/Clock.hpp"
+#include "../Utilities/Clock.hpp"
+#include "../Utilities/Score.hpp"
 #include "../graphics/Texture.hpp"
 #include "../graphics/ShaderProgram.hpp"
 #include "../graphics/Sprite.hpp"
@@ -86,11 +86,11 @@ class Game {
 
     bool shouldNewFigureBeSpawned;
     bool gameOver;
-
-    unsigned int highScore;
+    
+    Score score;
+    Score highScore;
     std::string highScoreStr;
-    unsigned int score;
-    unsigned int scorePerLine = 100;
+    score_t scorePerLine = 10;
 
     int fallingFigure_x1 = 0;
     int fallingFigure_y1 = 0;
@@ -108,7 +108,6 @@ class Game {
     void handleKey(int key, int action);
     void showGame();
     void showScore();
-    void writeNewHighScore();
     int genNextFigure(int color);
     int genNextColor();
     void spawnNextFigure(int figure, int color);

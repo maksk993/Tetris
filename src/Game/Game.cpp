@@ -31,14 +31,8 @@ Game::Game(GLFWwindow* _window, int width, int height) : window(_window), m_wind
     numbersSpriteMap[-1] = std::make_shared<Sprite>(textureMap["interface"], shaderProgramMap["sprite"],
         glm::vec2(m_windowWidth_1_2, 0.f), glm::vec2(m_windowWidth_1_2, m_windowHeight), 0.f);
 
-    std::ifstream highScoreFile("res/highScore.txt");
-    if (!highScoreFile.is_open()) {
-        std::cerr << "Failed to open file: res/highScore.txt" << std::endl;
-        exit(1);
-    }
-    highScoreFile >> highScore;
-    highScoreStr = std::to_string(highScore);
-    highScoreFile.close();
+    highScore.setScore("res/highScore.txt");
+    highScoreStr = highScore.getScoreString();
 
     start();
 }
@@ -50,7 +44,7 @@ void Game::start() {
 
     gameOver = false;
     shouldNewFigureBeSpawned = true;
-    score = 0;
+    score.setScore(0);
 }
 
 void Game::run() {
@@ -134,7 +128,7 @@ void Game::handleKey(int key, int action) {
             handleKey(GLFW_KEY_DOWN, GLFW_PRESS);
         } 
     }
-    else if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) {
+    else if (key == GLFW_KEY_LEFT && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
         for (int i = 0; i < FIELD_HEIGHT; i++) {
             for (int j = 0; j < FIELD_WIDTH; j++) {
                 if (field[i][j].canMove)
@@ -147,7 +141,7 @@ void Game::handleKey(int key, int action) {
         fallingFigure_x1--;
         fallingFigure_x2--;
     }
-    else if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
+    else if (key == GLFW_KEY_RIGHT && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
         for (int i = 0; i < FIELD_HEIGHT; i++) {
             for (int j = FIELD_WIDTH - 1; j >= 0; j--) {
                 if (field[i][j].canMove)
@@ -189,9 +183,12 @@ void Game::showGame() {
 
 void Game::showScore() {
     numbersSpriteMap[-1]->render();
-    if (score > highScore) writeNewHighScore();
+    if (score > highScore) {
+        highScore.setHighScore(score.getScore());
+        highScoreStr = highScore.getScoreString();
+    }
 
-    std::string scoreStr = std::to_string(score);
+    std::string scoreStr = score.getScoreString();
     float dx = 0.f;
     
     for (char& c : scoreStr) {
@@ -208,19 +205,6 @@ void Game::showScore() {
         numbersSpriteMap[num + numbersTexturesArray.size()]->render();
         dx += m_windowWidth_1_40;
     }
-}
- 
-void Game::writeNewHighScore() {
-    highScore = score;
-    highScoreStr = std::to_string(highScore);
-
-    std::ofstream highScoreFile("res/highScore.txt", std::ios::trunc);
-    if (!highScoreFile.is_open()) {
-        std::cerr << "Failed to open file: res/highScore.txt" << std::endl;
-        exit(1);
-    }
-    highScoreFile << highScore;
-    highScoreFile.close();
 }
 
 int Game::genNextFigure(int color) {
@@ -341,7 +325,7 @@ void Game::moveAllFiguresDownFrom(int y) {
 }
 
 void Game::deleteLines() {
-    int scoreMultiplier = 1;
+    int linesToDelete = 0;
     for (int i = 0; i < FIELD_HEIGHT; i++) {
         bool shouldLineBeDeleted = true;
         for (int j = 0; j < FIELD_WIDTH; j++) {
@@ -356,7 +340,7 @@ void Game::deleteLines() {
                 field[i][j].color = 0;
             }
             moveAllFiguresDownFrom(i-- + 1);
-            score += scorePerLine * scoreMultiplier++;
+            score += scorePerLine << linesToDelete++;
         }
     }   
 }

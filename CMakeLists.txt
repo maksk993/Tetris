@@ -17,7 +17,8 @@ add_executable(${PROJECT_NAME}
 	"src/graphics/ShaderProgram.cpp" 
 	"src/graphics/Texture.cpp" 
 	"src/graphics/Sprite.cpp"
-	"src/Clock/Clock.cpp"
+	"src/Utilities/Clock.cpp"
+	"src/Utilities/Score.cpp"
 )
 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
