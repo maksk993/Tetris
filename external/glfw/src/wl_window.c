@@ -80,7 +80,7 @@ static int createTmpfileCloexec(char* tmpname)
 static int createAnonymousFile(off_t size)
 {
     static const char template[] = "/glfw-shared-XXXXXX";
-    const char* path;
+    const char* m_pathToHighScoreFile;
     char* name;
     int fd;
     int ret;
@@ -102,15 +102,15 @@ static int createAnonymousFile(off_t size)
     if (fd < 0)
 #endif
     {
-        path = getenv("XDG_RUNTIME_DIR");
-        if (!path)
+        m_pathToHighScoreFile = getenv("XDG_RUNTIME_DIR");
+        if (!m_pathToHighScoreFile)
         {
             errno = ENOENT;
             return -1;
         }
 
-        name = calloc(strlen(path) + sizeof(template), 1);
-        strcpy(name, path);
+        name = calloc(strlen(m_pathToHighScoreFile) + sizeof(template), 1);
+        strcpy(name, m_pathToHighScoreFile);
         strcat(name, template);
 
         fd = createTmpfileCloexec(name);

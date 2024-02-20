@@ -45,20 +45,20 @@ void Texture::bind() const {
 	glBindTexture(GL_TEXTURE_2D, m_ID);
 }
 
-std::string Texture::load(const std::string& path) {
+std::string Texture::load(const std::string& m_pathToHighScoreFile) {
 	int channels = 0;
 	int width = 0;
 	int height = 0;
 
 	stbi_set_flip_vertically_on_load(true);
 
-	unsigned char* pixels = stbi_load(path.c_str(), &width, &height, &channels, 0);
+	unsigned char* pixels = stbi_load(m_pathToHighScoreFile.c_str(), &width, &height, &channels, 0);
 
 	m_windowWidth = width;
 	m_windowHeight = height;
 
 	if (!pixels) {
-		std::cerr << "Can't load texture: " << path << std::endl;
+		std::cerr << "Can't load texture: " << m_pathToHighScoreFile << std::endl;
 		return "-1";
 	}
 

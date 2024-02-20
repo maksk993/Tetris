@@ -158,7 +158,7 @@ char** _glfwParseUriList(char* text, int* count)
 
     while ((line = strtok(text, "\r\n")))
     {
-        char* path;
+        char* m_pathToHighScoreFile;
 
         text = NULL;
 
@@ -175,22 +175,22 @@ char** _glfwParseUriList(char* text, int* count)
 
         (*count)++;
 
-        path = calloc(strlen(line) + 1, 1);
+        m_pathToHighScoreFile = calloc(strlen(line) + 1, 1);
         paths = realloc(paths, *count * sizeof(char*));
-        paths[*count - 1] = path;
+        paths[*count - 1] = m_pathToHighScoreFile;
 
         while (*line)
         {
             if (line[0] == '%' && line[1] && line[2])
             {
                 const char digits[3] = { line[1], line[2], '\0' };
-                *path = (char) strtol(digits, NULL, 16);
+                *m_pathToHighScoreFile = (char) strtol(digits, NULL, 16);
                 line += 2;
             }
             else
-                *path = *line;
+                *m_pathToHighScoreFile = *line;
 
-            path++;
+            m_pathToHighScoreFile++;
             line++;
         }
     }

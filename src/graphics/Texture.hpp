@@ -1,11 +1,12 @@
 #pragma once
-#ifndef __TEXTURE_HPP__
-#define __TEXTURE_HPP__
 
-#include "IGraphics.hpp"
 #include "stb_image.h"
+#include <glad/glad.h>
 
-class Texture : public IGraphics { // Работа с текстурами
+#include <iostream>
+#include <string>
+
+class Texture { // Работа с текстурами
 public:
 	Texture(const std::string& texturePath,
         const unsigned int channels = 4,
@@ -20,10 +21,11 @@ public:
     Texture(Texture&&) noexcept;
     Texture& operator=(Texture&&) noexcept;
 
-    virtual GLuint getID() const override;
+    GLuint getID() const;
     void bind() const;
 
 private:
+    GLuint m_ID = 0;
     GLenum m_filter;
     GLenum m_wrapmode;
     GLenum m_mode;
@@ -31,8 +33,6 @@ private:
     unsigned int m_windowWidth;
     unsigned int m_windowHeight;
 
-    virtual std::string load(const std::string& path) override;
+    std::string load(const std::string& m_pathToHighScoreFile);
     void createTexture(const unsigned int channels, const unsigned char* pixels);
 };
-
-#endif // !__TEXTURE_HPP__

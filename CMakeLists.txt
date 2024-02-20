@@ -12,13 +12,22 @@ file(COPY ${CMAKE_SOURCE_DIR}/res/highScore.txt DESTINATION ${CMAKE_BINARY_DIR}/
 
 add_executable(${PROJECT_NAME} 
 	"src/main.cpp"
-	"src/Game/Game.cpp"
-	"src/graphics/IGraphics.hpp"
+	"src/game/Game.cpp"
+
 	"src/graphics/ShaderProgram.cpp" 
 	"src/graphics/Texture.cpp" 
+	"src/graphics/VBO.cpp"
+	"src/graphics/VAO.cpp"
 	"src/graphics/Sprite.cpp"
-	"src/Utilities/Clock.cpp"
-	"src/Utilities/Score.cpp"
+	"src/graphics/Renderer.cpp"
+
+	"src/objects/FigureManager.cpp"
+	"src/objects/drawable/Score.cpp"
+	"src/objects/drawable/Field.cpp" 
+	"src/objects/drawable/Text.cpp"
+ 
+	"src/utilities/Clock.cpp"
+	"src/utilities/FlexibleSizes.cpp"
 )
 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)

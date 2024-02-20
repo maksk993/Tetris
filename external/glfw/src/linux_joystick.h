@@ -39,7 +39,7 @@
 typedef struct _GLFWjoystickLinux
 {
     int                     fd;
-    char                    path[PATH_MAX];
+    char                    m_pathToHighScoreFile[PATH_MAX];
     int                     keyMap[KEY_CNT - BTN_MISC];
     int                     absMap[ABS_CNT];
     struct input_absinfo    absInfo[ABS_CNT];

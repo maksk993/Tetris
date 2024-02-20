@@ -124,18 +124,18 @@ static void pollAbsState(_GLFWjoystick* js)
 
 // Attempt to open the specified joystick device
 //
-static GLFWbool openJoystickDevice(const char* path)
+static GLFWbool openJoystickDevice(const char* m_pathToHighScoreFile)
 {
     for (int jid = 0;  jid <= GLFW_JOYSTICK_LAST;  jid++)
     {
         if (!_glfw.joysticks[jid].connected)
             continue;
-        if (strcmp(_glfw.joysticks[jid].linjs.path, path) == 0)
+        if (strcmp(_glfw.joysticks[jid].linjs.m_pathToHighScoreFile, m_pathToHighScoreFile) == 0)
             return GLFW_FALSE;
     }
 
     _GLFWjoystickLinux linjs = {0};
-    linjs.fd = open(path, O_RDONLY | O_NONBLOCK);
+    linjs.fd = open(m_pathToHighScoreFile, O_RDONLY | O_NONBLOCK);
     if (linjs.fd == -1)
         return GLFW_FALSE;
 
@@ -230,7 +230,7 @@ static GLFWbool openJoystickDevice(const char* path)
         return GLFW_FALSE;
     }
 
-    strncpy(linjs.path, path, sizeof(linjs.path) - 1);
+    strncpy(linjs.m_pathToHighScoreFile, m_pathToHighScoreFile, sizeof(linjs.m_pathToHighScoreFile) - 1);
     memcpy(&js->linjs, &linjs, sizeof(linjs));
 
     pollAbsState(js);
@@ -256,7 +256,7 @@ static int compareJoysticks(const void* fp, const void* sp)
 {
     const _GLFWjoystick* fj = fp;
     const _GLFWjoystick* sj = sp;
-    return strcmp(fj->linjs.path, sj->linjs.path);
+    return strcmp(fj->linjs.m_pathToHighScoreFile, sj->linjs.m_pathToHighScoreFile);
 }
 
 
@@ -304,11 +304,11 @@ GLFWbool _glfwInitJoysticksLinux(void)
             if (regexec(&_glfw.linjs.regex, entry->d_name, 1, &match, 0) != 0)
                 continue;
 
-            char path[PATH_MAX];
+            char m_pathToHighScoreFile[PATH_MAX];
 
-            snprintf(path, sizeof(path), "%s/%s", dirname, entry->d_name);
+            snprintf(m_pathToHighScoreFile, sizeof(m_pathToHighScoreFile), "%s/%s", dirname, entry->d_name);
 
-            if (openJoystickDevice(path))
+            if (openJoystickDevice(m_pathToHighScoreFile))
                 count++;
         }
 
@@ -367,16 +367,16 @@ void _glfwDetectJoystickConnectionLinux(void)
         if (regexec(&_glfw.linjs.regex, e->name, 1, &match, 0) != 0)
             continue;
 
-        char path[PATH_MAX];
-        snprintf(path, sizeof(path), "/dev/input/%s", e->name);
+        char m_pathToHighScoreFile[PATH_MAX];
+        snprintf(m_pathToHighScoreFile, sizeof(m_pathToHighScoreFile), "/dev/input/%s", e->name);
 
         if (e->mask & (IN_CREATE | IN_ATTRIB))
-            openJoystickDevice(path);
+            openJoystickDevice(m_pathToHighScoreFile);
         else if (e->mask & IN_DELETE)
         {
             for (int jid = 0;  jid <= GLFW_JOYSTICK_LAST;  jid++)
             {
-                if (strcmp(_glfw.joysticks[jid].linjs.path, path) == 0)
+                if (strcmp(_glfw.joysticks[jid].linjs.m_pathToHighScoreFile, m_pathToHighScoreFile) == 0)
                 {
                     closeJoystick(_glfw.joysticks + jid);
                     break;

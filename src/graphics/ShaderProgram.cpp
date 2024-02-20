@@ -57,11 +57,11 @@ void ShaderProgram::setMatrix4(const std::string& name, const glm::mat4& matrix)
     glUniformMatrix4fv(glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
-std::string ShaderProgram::load(const std::string& path) {
-    std::ifstream file(path);
+std::string ShaderProgram::load(const std::string& m_pathToHighScoreFile) {
+    std::ifstream file(m_pathToHighScoreFile);
 
     if (!file.is_open()) {
-        std::cerr << "Failed to open file: " << path << std::endl;
+        std::cerr << "Failed to open file: " << m_pathToHighScoreFile << std::endl;
         return "";
     }
 
