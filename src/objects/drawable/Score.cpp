@@ -1,13 +1,6 @@
 #include "Score.hpp"
 
-Score::Score() {
-    m_score = m_offset = 0;
-    m_pathToHighScoreFile = "";
-    m_position = glm::vec2(0.f);
-}
-
-void Score::operator+=(score_t value) {
-    m_score += value;
+Score::Score() : m_score(0), m_offset(0), m_scorePerLine(0), m_pathToHighScoreFile(""), m_position(glm::vec2(0.f)) {
 }
 
 bool Score::operator>(Score other) {
@@ -57,6 +50,14 @@ score_t Score::getScore() {
 
 std::string Score::getScoreString() {
     return std::to_string(m_score);
+}
+
+void Score::setScorePerLine(score_t scorePerLine) {
+    m_scorePerLine = scorePerLine;
+}
+
+void Score::increaseScore(int leftShiftBy) {
+    m_score += m_scorePerLine << leftShiftBy;
 }
 
 void Score::writeScoreToFile() {

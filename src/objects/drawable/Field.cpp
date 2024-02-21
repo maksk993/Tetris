@@ -1,7 +1,6 @@
 #include "Field.hpp"
 
-Field::Field() : m_width(0), m_height(0), m_offset(0), m_pScore(nullptr), 
-				 m_pHighScore(nullptr), m_position(glm::vec2(0.f)) {
+Field::Field() : m_width(0), m_height(0), m_offset(0), m_pScore(nullptr), m_pHighScore(nullptr), m_position(glm::vec2(0.f)) {
 }
 
 std::vector<Field::Cell>& Field::operator[](size_t index) {
@@ -87,7 +86,7 @@ void Field::deleteLines() {
 				m_field[i][j].color = 0;
 			}
 			moveAllFiguresDownFrom(i-- + 1);
-			(*m_pScore) += (scorePerLine << linesToDelete++);	
+			m_pScore->increaseScore(linesToDelete++);
 		}
 	}
 	if ((*m_pScore) > (*m_pHighScore)) m_pHighScore->setHighScore((*m_pScore).getScore());

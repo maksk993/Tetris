@@ -83,6 +83,7 @@ Game::Game(GLFWwindow* _window, size_t width, size_t height) : window(_window), 
         FlexibleSizes::getSize(m_windowWidth, 40)
     );
 
+    m_score.setScorePerLine(10);
     m_highScore.setPathToFile("res/highScore.txt");
     m_field.setScoreAndHighScore(&m_score, &m_highScore);
     m_figureManager.init(&m_field, &m_miniScreen);

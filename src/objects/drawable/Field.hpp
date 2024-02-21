@@ -36,7 +36,6 @@ private:
 
     Score* m_pScore;
     HighScore* m_pHighScore;
-    score_t scorePerLine = 10;
     
     std::vector<std::shared_ptr<Sprite>> m_pSprites;
     glm::vec2 m_position;
