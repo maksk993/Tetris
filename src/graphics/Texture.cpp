@@ -16,10 +16,10 @@ Texture::Texture(Texture&& other) noexcept {
 	m_filter = other.m_filter;
 	m_wrapmode = other.m_wrapmode;
 	m_mode = other.m_mode;
-	m_windowWidth = other.m_windowWidth;
-	m_windowHeight = other.m_windowHeight;
+	m_width = other.m_width;
+	m_height = other.m_height;
 
-	other.m_ID = other.m_windowWidth = other.m_windowHeight = 0;
+	other.m_ID = other.m_width = other.m_height = 0;
 }
 
 Texture& Texture::operator=(Texture&& other) noexcept {
@@ -29,10 +29,10 @@ Texture& Texture::operator=(Texture&& other) noexcept {
 		m_filter = other.m_filter;
 		m_wrapmode = other.m_wrapmode;
 		m_mode = other.m_mode;
-		m_windowWidth = other.m_windowWidth;
-		m_windowHeight = other.m_windowHeight;
+		m_width = other.m_width;
+		m_height = other.m_height;
 
-		other.m_ID = other.m_windowWidth = other.m_windowHeight = 0;
+		other.m_ID = other.m_width = other.m_height = 0;
 	}
 	return *this;
 }
@@ -45,20 +45,20 @@ void Texture::bind() const {
 	glBindTexture(GL_TEXTURE_2D, m_ID);
 }
 
-std::string Texture::load(const std::string& m_pathToHighScoreFile) {
+std::string Texture::load(const std::string& path) {
 	int channels = 0;
 	int width = 0;
 	int height = 0;
 
 	stbi_set_flip_vertically_on_load(true);
 
-	unsigned char* pixels = stbi_load(m_pathToHighScoreFile.c_str(), &width, &height, &channels, 0);
+	unsigned char* pixels = stbi_load(path.c_str(), &width, &height, &channels, 0);
 
-	m_windowWidth = width;
-	m_windowHeight = height;
+	m_width = width;
+	m_height = height;
 
 	if (!pixels) {
-		std::cerr << "Can't load texture: " << m_pathToHighScoreFile << std::endl;
+		std::cerr << "Can't load texture: " << path << std::endl;
 		return "-1";
 	}
 
@@ -84,7 +84,7 @@ void Texture::createTexture(const unsigned int channels, const unsigned char* pi
 	glGenTextures(1, &m_ID);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_ID);
-	glTexImage2D(GL_TEXTURE_2D, 0, m_mode, m_windowWidth, m_windowHeight, 0, m_mode, GL_UNSIGNED_BYTE, pixels);
+	glTexImage2D(GL_TEXTURE_2D, 0, m_mode, m_width, m_height, 0, m_mode, GL_UNSIGNED_BYTE, pixels);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_wrapmode);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_wrapmode);

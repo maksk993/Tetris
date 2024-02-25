@@ -30,9 +30,9 @@ private:
     GLenum m_wrapmode;
     GLenum m_mode;
 
-    unsigned int m_windowWidth;
-    unsigned int m_windowHeight;
+    unsigned int m_width;
+    unsigned int m_height;
 
-    std::string load(const std::string& m_pathToHighScoreFile);
+    std::string load(const std::string& path);
     void createTexture(const unsigned int channels, const unsigned char* pixels);
 };

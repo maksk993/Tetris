@@ -30,7 +30,7 @@ public:
 private:
     GLuint m_ID = 0;
 
-    std::string load(const std::string& m_pathToHighScoreFile);
+    std::string load(const std::string& path);
     bool createShader(const char* shaderSource, GLenum shaderType, GLuint& shaderID);
     void createShaderProgram(GLuint& vertexShaderID, GLuint& fragmentShaderID);
 };
