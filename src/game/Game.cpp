@@ -47,7 +47,8 @@ Game::Game(GLFWwindow* _window, size_t width, size_t height) : window(_window), 
         highScoreSprites[i] = std::make_shared<Sprite>(
             textureMap["numbers"], 
             shaderProgramMap["sprite"],
-            glm::vec2(0.f), glm::vec2(FlexibleSizes::getSize(m_windowWidth, 40), FlexibleSizes::getSize(m_windowHeight, 36)), 
+            glm::vec2(0.f), 
+            glm::vec2(FlexibleSizes::getSize(m_windowWidth, 40), FlexibleSizes::getSize(m_windowHeight, 36)), 
             0.f, 
             numbersTexturesArray[i]
         );
@@ -85,7 +86,7 @@ Game::Game(GLFWwindow* _window, size_t width, size_t height) : window(_window), 
 
     m_score.setScorePerLine(10);
     m_highScore.setPathToFile("res/highScore.txt");
-    m_field.setScoreAndHighScore(&m_score, &m_highScore);
+    m_field.setScore(&m_score);
     m_figureManager.init(&m_field, &m_miniScreen);
 
     start();
@@ -96,8 +97,9 @@ void Game::start() {
     m_miniScreen.clear();
     m_figureManager.setGameOver(false);
     m_figureManager.setShouldNewFigureBeSpawned(true);
-
     m_score.setScore(0);
+    fallenFiguresCounter = 0;
+    delay = 1000;
 }
 
 void Game::run() {
@@ -112,9 +114,7 @@ void Game::run() {
     int nextColor = m_figureManager.genNextColor();
     int nextFigure = m_figureManager.genNextFigure(nextColor);
 
-    Clock clock;
     float timer = 0.f;
-    int delay = 400;
     
     while (!glfwWindowShouldClose(window)) {
         if (m_figureManager.isGameOver()) {
@@ -135,6 +135,8 @@ void Game::run() {
 
         if (m_figureManager.shouldNewFigureBeSpawned()) {
             m_field.deleteLines();
+            increaseSpeed();
+            if (m_score > m_highScore) m_highScore.setScore(m_score.getScore());
             m_figureManager.spawnNextFigure(nextFigure, nextColor);
             nextColor = m_figureManager.genNextColor();
             nextFigure = m_figureManager.genNextFigure(nextColor);
@@ -184,4 +186,12 @@ void Game::showGame() {
     m_score.render();
     m_highScore.render();
     m_miniScreen.render();
+}
+
+void Game::increaseSpeed() {
+    if (++fallenFiguresCounter % 50 == 0) delay *= 0.8;
+}
+
+Game::~Game() {
+    m_highScore.writeScoreToFile();
 }

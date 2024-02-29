@@ -39,11 +39,6 @@ void Score::setPathToFile(const std::string& path) {
     highScoreFile.close();
 }
 
-void Score::setHighScore(score_t value) {
-    setScore(value);
-    writeScoreToFile();
-}
-
 score_t Score::getScore() {
     return m_score;
 }

@@ -16,7 +16,7 @@ public:
 	virtual void render() override;
 	void setScore(score_t value);
 	void setPathToFile(const std::string& path);
-	void setHighScore(score_t value);
+	void writeScoreToFile();
 	score_t getScore();
 	std::string getScoreString();
 	void setScorePerLine(score_t scorePerLine);
@@ -30,8 +30,6 @@ private:
 	std::vector<std::shared_ptr<Sprite>> m_pNumbersSprites;
 	glm::vec2 m_position;
 	float m_offset;
-
-	void writeScoreToFile();
 };
 
 using HighScore = Score;

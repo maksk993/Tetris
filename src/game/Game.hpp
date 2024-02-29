@@ -19,6 +19,7 @@
 class Game {
 public:
     Game(GLFWwindow* _window, size_t width, size_t height);
+    ~Game();
     void run();
 
 private:
@@ -64,9 +65,14 @@ private:
         {0.9f, 0.f,   1.f, 0.f,   1.f, 1.f,   0.9f, 1.f}
     } };
 
+    Clock clock;
+    float delay;
+    size_t fallenFiguresCounter;
+
     void start();
     static void keysCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
     static void framebufferSizeCallback(GLFWwindow* window, int width, int height);
     void handleKey(int key, int action);
     void showGame();
+    void increaseSpeed();
 };
