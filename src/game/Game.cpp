@@ -189,7 +189,7 @@ void Game::showGame() {
 }
 
 void Game::increaseSpeed() {
-    if (++fallenFiguresCounter % 50 == 0) delay *= 0.8;
+    if (++fallenFiguresCounter % 40 == 0) delay *= 0.8f;
 }
 
 Game::~Game() {

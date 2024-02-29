@@ -68,20 +68,22 @@ bool FigureManager::moveFigure(int x, int y, int dx, int dy) {
     return false;
 }
 
-bool FigureManager::rotateFigure() {
-    if (fallingFigureType == 0) return true; // figures[0] == 'O'
+void FigureManager::rotateFigure() {
+    if (fallingFigureType == 0) return; // figures[0] == 'O'
 
     if (fallingFigure_x1 < 0) handleKeyRight();
     if (fallingFigure_x2 > m_fieldWidth) handleKeyLeft();
     for (int i = fallingFigure_y1; i < fallingFigure_y2; i++) {
-        if (fallingFigure_x2 - 1 >= m_fieldWidth || fallingFigure_y1 < 0) return true;
+        if (fallingFigure_x2 - 1 >= m_fieldWidth || fallingFigure_y1 < 0) 
+            return;
         if ((*m_pField)[i][fallingFigure_x2 - 1].used && !(*m_pField)[i][fallingFigure_x2 - 1].canMove)
             handleKeyLeft();
     }
     for (int i = fallingFigure_y1; i < fallingFigure_y2; i++) {
-        if (fallingFigure_x1 < 0 || fallingFigure_y1 < 0) return true;
+        if (fallingFigure_x1 < 0 || fallingFigure_y1 < 0) 
+            return;
         if ((*m_pField)[i][fallingFigure_x1].used && !(*m_pField)[i][fallingFigure_x1].canMove)
-            handleKeyRight();
+             handleKeyRight();
     }
 
     size_t matrixWidth = 3;
@@ -92,7 +94,8 @@ bool FigureManager::rotateFigure() {
 
     for (int i = fallingFigure_y1, c_i = 0; c_i < matrixHeigth; i++, c_i++) {
         for (int j = fallingFigure_x1, c_j = 0; c_j < matrixWidth; j++, c_j++) {
-            if (j < 0 || j >= m_fieldWidth || i < 0) return false;
+            if (j < 0 || j >= m_fieldWidth || i < 0 || !(*m_pField)[i][j].canMove && (*m_pField)[i][j].used) 
+                return;
             CurrentMatrix[c_i][c_j] = (*m_pField)[i][j];
         }
     }
@@ -103,14 +106,9 @@ bool FigureManager::rotateFigure() {
         for (int j = 0; j < matrixHeigth; j++)
             RotatedMatrix[i][j] = CurrentMatrix[j][matrixWidth - i - 1];
 
-    for (int i = fallingFigure_y1, r_i = 0; r_i < matrixHeigth; i++, r_i++) {
-        for (int j = fallingFigure_x1, r_j = 0; r_j < matrixWidth; j++, r_j++) {
-            if (((*m_pField)[i][j].used && !(*m_pField)[i][j].canMove) || (j < 0 || j >= m_fieldWidth || i < 0)) return false;
+    for (int i = fallingFigure_y1, r_i = 0; r_i < matrixHeigth; i++, r_i++)
+        for (int j = fallingFigure_x1, r_j = 0; r_j < matrixWidth; j++, r_j++)
             (*m_pField)[i][j] = RotatedMatrix[r_i][r_j];
-        }
-    }
-
-    return true;
 }
 
 void FigureManager::handleKeyDown() {
@@ -167,9 +165,5 @@ void FigureManager::handleKeyRight() {
 }
 
 void FigureManager::handleKeySpace() {
-    m_pField->saveField();
-    if (!rotateFigure()) {
-        m_pField->returnField();
-        return;
-    }
+    rotateFigure();
 }

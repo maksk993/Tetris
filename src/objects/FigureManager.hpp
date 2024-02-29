@@ -13,7 +13,7 @@ public:
     int genNextColor();
     void spawnNextFigure(int figure, int color);
     bool moveFigure(int x, int y, int dx, int dy);
-    bool rotateFigure();
+    void rotateFigure();
 
     void handleKeyDown();
     void handleKeyUp();
