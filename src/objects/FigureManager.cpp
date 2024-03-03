@@ -81,18 +81,18 @@ void FigureManager::rotateFigure() {
     }
     for (int i = fallingFigure_y1; i < fallingFigure_y2; i++) {
         if (fallingFigure_x1 < 0 || fallingFigure_y1 < 0) 
-             return;
+            return;
         if ((*m_pField)[i][fallingFigure_x1].used && !(*m_pField)[i][fallingFigure_x1].canMove)
-             handleKeyRight();
+            handleKeyRight();
     }
 
     size_t matrixWidth = 3;
-    size_t matrixHeigth = 3;
-    if (fallingFigureType == 5) matrixWidth = 4, matrixHeigth = 4; // figures[5] == 'I'
+    size_t matrixHeight = 3;
+    if (fallingFigureType == 5) matrixWidth = 4, matrixHeight = 4; // figures[5] == 'I'
 
-    std::vector<std::vector<Field::Cell>> CurrentMatrix(matrixHeigth, std::vector<Field::Cell>(matrixWidth));
+    std::vector<std::vector<Field::Cell>> CurrentMatrix(matrixHeight, std::vector<Field::Cell>(matrixWidth));
 
-    for (int i = fallingFigure_y1, c_i = 0; c_i < matrixHeigth; i++, c_i++) {
+    for (int i = fallingFigure_y1, c_i = 0; c_i < matrixHeight; i++, c_i++) {
         for (int j = fallingFigure_x1, c_j = 0; c_j < matrixWidth; j++, c_j++) {
             if (j < 0 || j >= m_fieldWidth || i < 0 || !(*m_pField)[i][j].canMove && (*m_pField)[i][j].used) 
                 return;
@@ -100,8 +100,8 @@ void FigureManager::rotateFigure() {
         }
     }
 
-    for (int i = fallingFigure_y1, c_i = 0; c_i < matrixHeigth; i++, c_i++)
-        for (int j = fallingFigure_x1, c_j = 0; c_j < matrixHeigth; j++, c_j++)
+    for (int i = fallingFigure_y1, c_i = 0; c_i < matrixHeight; i++, c_i++)
+        for (int j = fallingFigure_x1, c_j = 0; c_j < matrixWidth; j++, c_j++)
             (*m_pField)[i][j] = std::move(CurrentMatrix[c_j][matrixWidth - c_i - 1]);
 }
 

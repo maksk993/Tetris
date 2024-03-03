@@ -130,7 +130,7 @@ void Game::run() {
 
         if (timer > delay) {
             handleKey(GLFW_KEY_DOWN, GLFW_PRESS);
-            timer = 0;
+            timer = 0.f;
         }
 
         if (m_figureManager.shouldNewFigureBeSpawned()) {
