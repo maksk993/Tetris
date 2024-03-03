@@ -19,7 +19,6 @@
 class Game {
 public:
     Game(GLFWwindow* _window, size_t width, size_t height);
-    ~Game();
     void run();
 
 private:

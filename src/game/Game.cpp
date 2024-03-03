@@ -136,7 +136,10 @@ void Game::run() {
         if (m_figureManager.shouldNewFigureBeSpawned()) {
             m_field.deleteLines();
             increaseSpeed();
-            if (m_score > m_highScore) m_highScore.setScore(m_score.getScore());
+            if (m_score > m_highScore) {
+                m_highScore.setScore(m_score.getScore());
+                m_highScore.writeScoreToFile();
+            }
             m_figureManager.spawnNextFigure(nextFigure, nextColor);
             nextColor = m_figureManager.genNextColor();
             nextFigure = m_figureManager.genNextFigure(nextColor);
@@ -190,8 +193,4 @@ void Game::showGame() {
 
 void Game::increaseSpeed() {
     if (++fallenFiguresCounter % 40 == 0) delay *= 0.8f;
-}
-
-Game::~Game() {
-    m_highScore.writeScoreToFile();
 }

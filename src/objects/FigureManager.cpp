@@ -81,7 +81,7 @@ void FigureManager::rotateFigure() {
     }
     for (int i = fallingFigure_y1; i < fallingFigure_y2; i++) {
         if (fallingFigure_x1 < 0 || fallingFigure_y1 < 0) 
-            return;
+             return;
         if ((*m_pField)[i][fallingFigure_x1].used && !(*m_pField)[i][fallingFigure_x1].canMove)
              handleKeyRight();
     }
@@ -100,15 +100,9 @@ void FigureManager::rotateFigure() {
         }
     }
 
-    std::vector<std::vector<Field::Cell>> RotatedMatrix(matrixWidth, std::vector<Field::Cell>(matrixHeigth));
-
-    for (int i = 0; i < matrixWidth; i++)
-        for (int j = 0; j < matrixHeigth; j++)
-            RotatedMatrix[i][j] = CurrentMatrix[j][matrixWidth - i - 1];
-
-    for (int i = fallingFigure_y1, r_i = 0; r_i < matrixHeigth; i++, r_i++)
-        for (int j = fallingFigure_x1, r_j = 0; r_j < matrixWidth; j++, r_j++)
-            (*m_pField)[i][j] = RotatedMatrix[r_i][r_j];
+    for (int i = fallingFigure_y1, c_i = 0; c_i < matrixHeigth; i++, c_i++)
+        for (int j = fallingFigure_x1, c_j = 0; c_j < matrixHeigth; j++, c_j++)
+            (*m_pField)[i][j] = std::move(CurrentMatrix[c_j][matrixWidth - c_i - 1]);
 }
 
 void FigureManager::handleKeyDown() {
