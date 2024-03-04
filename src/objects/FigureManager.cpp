@@ -60,12 +60,16 @@ void FigureManager::spawnNextFigure(int figure, int color) {
     fallingFigure_y2 = m_miniScreenHeight + spawnZone_dy;
 }
 
-bool FigureManager::moveFigure(int x, int y, int dx, int dy) {
-    if (x + dx < m_fieldWidth && x + dx >= 0 && y + dy >= 0 && !(*m_pField)[y + dy][x + dx].used) {
-        std::swap((*m_pField)[y][x], (*m_pField)[y + dy][x + dx]);
+bool FigureManager::canFigureBeMoved(int x, int y, int dx, int dy) {
+    if (x + dx < m_fieldWidth && x + dx >= 0 && y + dy >= 0 && (!(*m_pField)[y + dy][x + dx].used ||
+        (*m_pField)[y + dy][x + dx].used && (*m_pField)[y + dy][x + dx].canMove)) {
         return true;
     }
     return false;
+}
+
+void FigureManager::moveFigure(int x, int y, int dx, int dy) {
+    std::swap((*m_pField)[y][x], (*m_pField)[y + dy][x + dx]);
 }
 
 void FigureManager::rotateFigure() {
@@ -106,16 +110,19 @@ void FigureManager::rotateFigure() {
 }
 
 void FigureManager::handleKeyDown() {
-    m_pField->saveField();
+    for (int i = 0; i < m_fieldHeight; i++) {
+        for (int j = 0; j < m_fieldWidth; j++) {
+            if ((*m_pField)[i][j].canMove && !canFigureBeMoved(j, i, 0, -1)) {
+                m_shouldNewFigureBeSpawned = true;
+                m_pField->makeFiguresMotionless();
+                return;
+            }
+        }
+    }
     for (int i = 0; i < m_fieldHeight; i++) {
         for (int j = 0; j < m_fieldWidth; j++) {
             if ((*m_pField)[i][j].canMove)
-                if (!moveFigure(j, i, 0, -1)) {
-                    m_pField->returnField();
-                    m_shouldNewFigureBeSpawned = true;
-                    m_pField->makeFiguresMotionless();
-                    return;
-                }
+                moveFigure(j, i, 0, -1);
         }
     }
     fallingFigure_y1--;
@@ -129,14 +136,16 @@ void FigureManager::handleKeyUp() {
 }
 
 void FigureManager::handleKeyLeft() {
-    m_pField->saveField();
+    for (int i = 0; i < m_fieldHeight; i++) {
+        for (int j = 0; j < m_fieldWidth; j++) {
+            if ((*m_pField)[i][j].canMove && !canFigureBeMoved(j, i, -1, 0))
+                return;
+        }
+    }
     for (int i = 0; i < m_fieldHeight; i++) {
         for (int j = 0; j < m_fieldWidth; j++) {
             if ((*m_pField)[i][j].canMove)
-                if (!moveFigure(j, i, -1, 0)) {
-                    m_pField->returnField();
-                    return;
-                }
+                moveFigure(j, i, -1, 0);
         }
     }
     fallingFigure_x1--;
@@ -144,14 +153,16 @@ void FigureManager::handleKeyLeft() {
 }
 
 void FigureManager::handleKeyRight() {
-    m_pField->saveField();
+    for (int i = 0; i < m_fieldHeight; i++) {
+        for (int j = m_fieldWidth - 1; j >= 0; j--) {
+            if ((*m_pField)[i][j].canMove && !canFigureBeMoved(j, i, 1, 0))
+                return;
+        }
+    }
     for (int i = 0; i < m_fieldHeight; i++) {
         for (int j = m_fieldWidth - 1; j >= 0; j--) {
             if ((*m_pField)[i][j].canMove)
-                if (!moveFigure(j, i, 1, 0)) {
-                    m_pField->returnField();
-                    return;
-                }
+                moveFigure(j, i, 1, 0);
         }
     }
     fallingFigure_x1++;

@@ -17,7 +17,6 @@ void Field::init(const unsigned int width, const unsigned int height,
 	for (auto& i : m_field) {
 		i.resize(m_width);
 	}
-	m_previousField = m_field;
 
 	m_pSprites = sprites;
 	m_position = std::move(position);
@@ -36,25 +35,15 @@ void Field::render() {
 void Field::clear() {
 	for (size_t i = 0; i < m_height; i++) {
 		for (size_t j = 0; j < m_width; j++) {
-			m_previousField[i][j].canMove = m_field[i][j].canMove = false;
-			m_previousField[i][j].used = m_field[i][j].used = false;
-			m_previousField[i][j].color = m_field[i][j].color = 0;
+			m_field[i][j].canMove = false;
+			m_field[i][j].used = false;
+			m_field[i][j].color = 0;
 		}
 	}
 }
 
 void Field::setScore(Score* pScore) {
 	m_pScore = pScore;
-}
-
-void Field::saveField() {
-	for (int i = 0; i < m_height; i++)
-		for (int j = 0; j < m_width; j++)
-			m_previousField[i][j] = m_field[i][j];
-}
-
-void Field::returnField() {
-	std::swap(m_field, m_previousField);
 }
 
 void Field::makeFiguresMotionless() {

@@ -19,8 +19,6 @@ public:
     virtual void render() override;
     void clear();
     void setScore(Score* pScore);
-    void saveField();
-    void returnField();
     void makeFiguresMotionless();
     void moveAllFiguresDownFrom(int y);
     void deleteLines();
@@ -32,7 +30,6 @@ private:
     size_t m_width;
     size_t m_height;
     std::vector<std::vector<Cell>> m_field;
-    std::vector<std::vector<Cell>> m_previousField;
 
     Score* m_pScore;
     
