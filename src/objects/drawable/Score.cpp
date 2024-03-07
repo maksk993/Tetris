@@ -1,10 +1,10 @@
 #include "Score.hpp"
 
-Score::Score() : m_score(0), m_offset(0), m_scorePerLine(0), m_pathToHighScoreFile(""), m_position(glm::vec2(0.f)) {
+Score::Score() : m_offset(0), m_scorePerLine(0), m_pathToHighScoreFile(""), m_position(glm::vec2(0.f)) {
 }
 
 bool Score::operator>(Score other) {
-    return m_score > other.m_score;
+    return m_value > other.m_value;
 }
 
 void Score::init(std::vector<std::shared_ptr<Sprite>>& sprites, glm::vec2& position, float offset) {
@@ -16,7 +16,7 @@ void Score::init(std::vector<std::shared_ptr<Sprite>>& sprites, glm::vec2& posit
 void Score::render() {
     float dx = 0.f;
 
-    for (char& c : getScoreString()) {
+    for (char& c : getValueString()) {
         int num = c - '0';
         m_pNumbersSprites[num]->setPosition(glm::vec2(m_position.x + dx, m_position.y));
         m_pNumbersSprites[num]->render();
@@ -24,9 +24,6 @@ void Score::render() {
     }
 }
 
-void Score::setScore(score_t value) {
-    m_score = value;
-}
 
 void Score::setPathToFile(const std::string& path) {
     m_pathToHighScoreFile = path;
@@ -35,24 +32,16 @@ void Score::setPathToFile(const std::string& path) {
         std::cerr << "Failed to set score from file: " << m_pathToHighScoreFile << std::endl;
         return;
     }
-    highScoreFile >> m_score;
+    highScoreFile >> m_value;
     highScoreFile.close();
 }
 
-score_t Score::getScore() {
-    return m_score;
-}
-
-std::string Score::getScoreString() {
-    return std::to_string(m_score);
-}
-
-void Score::setScorePerLine(score_t scorePerLine) {
+void Score::setScorePerLine(int scorePerLine) {
     m_scorePerLine = scorePerLine;
 }
 
-void Score::increaseScore(int leftShiftBy) {
-    m_score += m_scorePerLine << leftShiftBy;
+void Score::increaseValue(int leftShiftBy) {
+    m_value += m_scorePerLine << leftShiftBy;
 }
 
 void Score::writeScoreToFile() {
@@ -61,6 +50,6 @@ void Score::writeScoreToFile() {
         std::cerr << "Failed to write score to file: " << m_pathToHighScoreFile << std::endl;
         return;
     }
-    highScoreFile << m_score;
+    highScoreFile << m_value;
     highScoreFile.close();
 }

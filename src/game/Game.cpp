@@ -4,91 +4,9 @@ Game::Game(GLFWwindow* _window, size_t width, size_t height) : window(_window), 
     glfwSetWindowUserPointer(window, this);
     glfwSetKeyCallback(window, keysCallback);
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+
     srand(time(NULL));
-
-    textureMap["cell"] = std::make_shared<Texture>("res/textures/cells.png");
-    textureMap["interface"] = std::make_shared<Texture>("res/textures/interface400x800.png");
-    textureMap["numbers"] = std::make_shared<Texture>("res/textures/numbers400x46.png");
-
-    shaderProgramMap["sprite"] = std::make_shared<ShaderProgram>("res/shaders/vSprite.txt", "res/shaders/fSprite.txt");
-    
-    std::vector<std::shared_ptr<Sprite>> cellSprites(cellTexturesArray.size());
-    std::vector<std::shared_ptr<Sprite>> scoreSprites(numbersTexturesArray.size());
-    std::vector<std::shared_ptr<Sprite>> highScoreSprites(numbersTexturesArray.size());
-
-    std::shared_ptr<Sprite> textSprite = std::make_shared<Sprite>(
-        textureMap["interface"], 
-        shaderProgramMap["sprite"],
-        glm::vec2(FlexibleSizes::getSize(m_windowWidth, 2), 0.f), 
-        glm::vec2(FlexibleSizes::getSize(m_windowWidth, 2), m_windowHeight), 
-        0.f
-    );
-
-    for (int i = 0; i < cellTexturesArray.size(); i++) {
-        cellSprites[i] = std::make_shared<Sprite>(
-            textureMap["cell"], 
-            shaderProgramMap["sprite"],
-            glm::vec2(0.f), 
-            glm::vec2(FlexibleSizes::getSize(m_windowWidth, 20)), 
-            0.f, 
-            cellTexturesArray[i]
-        );
-    }
-
-    for (int i = 0; i < numbersTexturesArray.size(); i++) {
-        scoreSprites[i] = std::make_shared<Sprite>(
-            textureMap["numbers"], 
-            shaderProgramMap["sprite"],
-            glm::vec2(0.f), 
-            glm::vec2(FlexibleSizes::getSize(m_windowWidth, 20), FlexibleSizes::getSize(m_windowHeight, 18)),
-            0.f, 
-            numbersTexturesArray[i]
-        );
-        highScoreSprites[i] = std::make_shared<Sprite>(
-            textureMap["numbers"], 
-            shaderProgramMap["sprite"],
-            glm::vec2(0.f), 
-            glm::vec2(FlexibleSizes::getSize(m_windowWidth, 40), FlexibleSizes::getSize(m_windowHeight, 36)), 
-            0.f, 
-            numbersTexturesArray[i]
-        );
-    }
-
-    m_text.init(textSprite);
-
-    m_field.init(
-        FIELD_WIDTH, 
-        FIELD_HEIGHT, 
-        cellSprites, 
-        glm::vec2(0.f), 
-        FlexibleSizes::getSize(m_windowWidth, 20)
-    );
-
-    m_miniScreen.init(
-        MINISCREEN_WIDTH, 
-        MINISCREEN_HEIGHT, 
-        cellSprites, 
-        glm::vec2((FIELD_WIDTH + 3) * FlexibleSizes::getSize(m_windowWidth, 20), (FIELD_WIDTH + 1) * FlexibleSizes::getSize(m_windowWidth, 20)),
-        FlexibleSizes::getSize(m_windowWidth, 20)
-    );
-
-    m_score.init(
-        scoreSprites, 
-        glm::vec2(FlexibleSizes::getSize(5 * m_windowWidth, 8), FlexibleSizes::getSize(3 * m_windowHeight, 4)),
-        FlexibleSizes::getSize(m_windowWidth, 20)
-    );
-
-    m_highScore.init(
-        highScoreSprites, 
-        glm::vec2(FlexibleSizes::getSize(17 * m_windowWidth, 20), FlexibleSizes::getSize(19 * m_windowHeight, 20)), 
-        FlexibleSizes::getSize(m_windowWidth, 40)
-    );
-
-    m_score.setScorePerLine(10);
-    m_highScore.setPathToFile("res/highScore.txt");
-    m_field.setScore(&m_score);
-    m_figureManager.init(&m_field, &m_miniScreen);
-
+    loadResources();
     start();
 }
 
@@ -97,7 +15,8 @@ void Game::start() {
     m_miniScreen.clear();
     m_figureManager.setGameOver(false);
     m_figureManager.setShouldNewFigureBeSpawned(true);
-    m_score.setScore(0);
+    m_score.setValue(0);
+    m_speed.setValue(1);
     fallenFiguresCounter = 0;
     delay = 1000;
 }
@@ -137,7 +56,7 @@ void Game::run() {
             m_field.deleteLines();
             increaseSpeed();
             if (m_score > m_highScore) {
-                m_highScore.setScore(m_score.getScore());
+                m_highScore.setValue(m_score.getValue());
                 m_highScore.writeScoreToFile();
             }
             m_figureManager.spawnNextFigure(nextFigure, nextColor);
@@ -188,9 +107,113 @@ void Game::showGame() {
     m_text.render();
     m_score.render();
     m_highScore.render();
+    m_speed.render();
     m_miniScreen.render();
 }
 
 void Game::increaseSpeed() {
-    if (++fallenFiguresCounter % 40 == 0) delay *= 0.8f;
+    if (++fallenFiguresCounter % 40 == 0) {
+        delay *= 0.8f;
+        m_speed.increaseValue(1);
+    }
+}
+
+void Game::loadResources() {
+    textureMap["cell"] = std::make_shared<Texture>("res/textures/cells.png");
+    textureMap["interface"] = std::make_shared<Texture>("res/textures/interface400x800.png");
+    textureMap["numbers"] = std::make_shared<Texture>("res/textures/numbers400x46.png");
+
+    shaderProgramMap["sprite"] = std::make_shared<ShaderProgram>("res/shaders/vSprite.txt", "res/shaders/fSprite.txt");
+
+    std::vector<std::shared_ptr<Sprite>> cellSprites(cellTexturesArray.size());
+    std::vector<std::shared_ptr<Sprite>> scoreSprites(numbersTexturesArray.size());
+    std::vector<std::shared_ptr<Sprite>> highScoreSprites(numbersTexturesArray.size());
+    std::vector<std::shared_ptr<Sprite>> speedSprites(numbersTexturesArray.size());
+
+    std::shared_ptr<Sprite> textSprite = std::make_shared<Sprite>(
+        textureMap["interface"],
+        shaderProgramMap["sprite"],
+        glm::vec2(FlexibleSizes::getSize(m_windowWidth, 2), 0.f),
+        glm::vec2(FlexibleSizes::getSize(m_windowWidth, 2), m_windowHeight),
+        0.f
+    );
+
+    for (int i = 0; i < cellTexturesArray.size(); i++) {
+        cellSprites[i] = std::make_shared<Sprite>(
+            textureMap["cell"],
+            shaderProgramMap["sprite"],
+            glm::vec2(0.f),
+            glm::vec2(FlexibleSizes::getSize(m_windowWidth, 20)),
+            0.f,
+            cellTexturesArray[i]
+        );
+    }
+
+    for (int i = 0; i < numbersTexturesArray.size(); i++) {
+        scoreSprites[i] = std::make_shared<Sprite>(
+            textureMap["numbers"],
+            shaderProgramMap["sprite"],
+            glm::vec2(0.f),
+            glm::vec2(FlexibleSizes::getSize(m_windowWidth, 20), FlexibleSizes::getSize(m_windowHeight, 18)),
+            0.f,
+            numbersTexturesArray[i]
+        );
+        highScoreSprites[i] = std::make_shared<Sprite>(
+            textureMap["numbers"],
+            shaderProgramMap["sprite"],
+            glm::vec2(0.f),
+            glm::vec2(FlexibleSizes::getSize(m_windowWidth, 40), FlexibleSizes::getSize(m_windowHeight, 36)),
+            0.f,
+            numbersTexturesArray[i]
+        );
+        speedSprites[i] = std::make_shared<Sprite>(
+            textureMap["numbers"],
+            shaderProgramMap["sprite"],
+            glm::vec2(0.f),
+            glm::vec2(FlexibleSizes::getSize(m_windowWidth, 40), FlexibleSizes::getSize(m_windowHeight, 36)),
+            0.f,
+            numbersTexturesArray[i]
+        );
+    }
+
+    m_text.init(textSprite);
+
+    m_field.init(
+        FIELD_WIDTH,
+        FIELD_HEIGHT,
+        cellSprites,
+        glm::vec2(0.f),
+        FlexibleSizes::getSize(m_windowWidth, 20)
+    );
+
+    m_miniScreen.init(
+        MINISCREEN_WIDTH,
+        MINISCREEN_HEIGHT,
+        cellSprites,
+        glm::vec2((FIELD_WIDTH + 3) * FlexibleSizes::getSize(m_windowWidth, 20), (FIELD_WIDTH + 1) * FlexibleSizes::getSize(m_windowWidth, 20)),
+        FlexibleSizes::getSize(m_windowWidth, 20)
+    );
+
+    m_score.init(
+        scoreSprites,
+        glm::vec2(FlexibleSizes::getSize(5 * m_windowWidth, 8), FlexibleSizes::getSize(3 * m_windowHeight, 4)),
+        FlexibleSizes::getSize(m_windowWidth, 20)
+    );
+
+    m_highScore.init(
+        highScoreSprites,
+        glm::vec2(FlexibleSizes::getSize(17 * m_windowWidth, 20), FlexibleSizes::getSize(19 * m_windowHeight, 20)),
+        FlexibleSizes::getSize(m_windowWidth, 40)
+    );
+
+    m_speed.init(
+        speedSprites,
+        glm::vec2(FlexibleSizes::getSize(5 * m_windowWidth, 6), FlexibleSizes::getSize(2 * m_windowHeight, 5)),
+        FlexibleSizes::getSize(m_windowWidth, 40)
+    );
+
+    m_score.setScorePerLine(10);
+    m_highScore.setPathToFile("res/highScore.txt");
+    m_field.setScore(&m_score);
+    m_figureManager.init(&m_field, &m_miniScreen);
 }

@@ -2,11 +2,9 @@
 
 #include <fstream>
 #include <iostream>
-#include "IDrawableObject.hpp"
+#include "NumerableObject.hpp"
 
-using score_t = int;
-
-class Score : public IDrawableObject {
+class Score : public NumerableObject {
 public:
 	Score();
 
@@ -14,18 +12,14 @@ public:
 
 	void init(std::vector<std::shared_ptr<Sprite>>& sprites, glm::vec2& position, float offset);
 	virtual void render() override;
-	void setScore(score_t value);
 	void setPathToFile(const std::string& path);
 	void writeScoreToFile();
-	score_t getScore();
-	std::string getScoreString();
-	void setScorePerLine(score_t scorePerLine);
-	void increaseScore(int leftShiftBy);
+	void setScorePerLine(int scorePerLine);
+	virtual void increaseValue(int leftShiftBy) override;
 
 private:
-	score_t m_score;
 	std::string m_pathToHighScoreFile;
-	score_t m_scorePerLine;
+	int m_scorePerLine;
 	
 	std::vector<std::shared_ptr<Sprite>> m_pNumbersSprites;
 	glm::vec2 m_position;

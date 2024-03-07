@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include "../objects/drawable/Score.hpp"
+#include "../objects/drawable/Speed.hpp"
 #include "../objects/drawable/Field.hpp"
 #include "../objects/drawable/Text.hpp"
 #include "../objects/FigureManager.hpp"
@@ -40,6 +41,7 @@ private:
     Text m_text;
     Score m_score;
     HighScore m_highScore;
+    Speed m_speed;
 
     std::array<std::array<GLfloat, 8>, 7> cellTexturesArray = { {
         {0.f, 0.f,   1.f / 7, 0.f,   1.f / 7, 1.f,   0.f, 1.f},
@@ -68,6 +70,7 @@ private:
     float delay;
     size_t fallenFiguresCounter;
 
+    void loadResources();
     void start();
     static void keysCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
     static void framebufferSizeCallback(GLFWwindow* window, int width, int height);

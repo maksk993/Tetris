@@ -74,7 +74,7 @@ void Field::deleteLines() {
 				m_field[i][j].color = 0;
 			}
 			moveAllFiguresDownFrom(i-- + 1);
-			m_pScore->increaseScore(linesToDelete++);
+			m_pScore->increaseValue(linesToDelete++);
 		}
 	}
 }
