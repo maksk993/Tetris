@@ -18,7 +18,7 @@ void Game::start() {
     m_score.setValue(0);
     m_speed.setValue(1);
     fallenFiguresCounter = 0;
-    delay = 1000;
+    figureFallDelay = 1000.f;
     m_currentGameState = EGameState::figureIsFalling;
 }
 
@@ -82,13 +82,12 @@ void Game::update() {
         if (m_figureManager.isGameOver()) {
             start();
         }
-        Renderer::clear();
 
         time = clock.getElapsedTime();
         clock.restart();
         timer += time;
 
-        if (timer > delay) {
+        if (timer > figureFallDelay) {
             handleKey(GLFW_KEY_DOWN, GLFW_PRESS);
             timer = 0.f;
         }
@@ -114,11 +113,18 @@ void Game::update() {
             shouldLineDeletionAnimationStart = true;
         }
         else if (shouldLineDeletionAnimationStart) {
-            static int j = 0;
-            m_field.deleteLinesAnimation(j++);
-            if (j > m_field.getWidth()) {
-                shouldLineDeletionAnimationStart = false;
-                j = 0;
+            time = clock.getElapsedTime();
+            clock.restart();
+            timer += time;
+
+            if (timer > deleteLineDelay) {
+                static int j = 0;
+                m_field.deleteLinesAnimation(j++);
+                if (j > m_field.getWidth()) {
+                    shouldLineDeletionAnimationStart = false;
+                    j = 0;
+                }
+                timer = 0.f;
             }
         }
         else {
@@ -138,12 +144,13 @@ void Game::spawnNewFigureAndGenerateNext() {
 
 void Game::increaseSpeed() {
     if (++fallenFiguresCounter % 40 == 0) {
-        delay *= 0.8f;
+        figureFallDelay *= 0.8f;
         m_speed.increaseValue(1);
     }
 }
 
 void Game::showGame() {
+    Renderer::clear();
     m_field.render();
     m_text.render();
     m_score.render();

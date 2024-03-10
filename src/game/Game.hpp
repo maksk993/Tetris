@@ -67,7 +67,8 @@ private:
     } };
 
     Clock clock;
-    float delay;
+    float figureFallDelay;
+    float deleteLineDelay = 50.f;
     float timer = 0.f;
     float time = 0.f;
     size_t fallenFiguresCounter;

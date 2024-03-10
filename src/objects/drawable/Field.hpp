@@ -2,8 +2,6 @@
 
 #include "IDrawableObject.hpp"
 #include "Score.hpp"
-#include <chrono>
-#include <thread>
 
 class Field : public IDrawableObject {
 public:
