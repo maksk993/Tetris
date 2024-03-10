@@ -2,12 +2,15 @@
 
 #include "IDrawableObject.hpp"
 #include "Score.hpp"
+#include <chrono>
+#include <thread>
 
 class Field : public IDrawableObject {
 public:
     struct Cell {
         bool used;
         bool canMove;
+        bool toDelete;
         int color;
     };
 
@@ -21,7 +24,8 @@ public:
     void setScore(Score* pScore);
     void makeFiguresMotionless();
     void moveAllFiguresDownFrom(int y);
-    void deleteLines();
+    bool shouldAnyLineBeDeleted();
+    void deleteLinesAnimation(int j);
 
     size_t getWidth() { return m_width; }
     size_t getHeight() { return m_height; }

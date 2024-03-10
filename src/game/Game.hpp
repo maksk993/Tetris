@@ -68,13 +68,23 @@ private:
 
     Clock clock;
     float delay;
+    float timer = 0.f;
+    float time = 0.f;
     size_t fallenFiguresCounter;
+    int nextColor = 0;
+    int nextFigure = 0;
+    bool shouldLineDeletionAnimationStart = false;
+
+    enum class EGameState { figureIsFalling, lineIsDeleting };
+    EGameState m_currentGameState;
 
     void loadResources();
     void start();
     static void keysCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
     static void framebufferSizeCallback(GLFWwindow* window, int width, int height);
     void handleKey(int key, int action);
+    void update();
+    void spawnNewFigureAndGenerateNext();
     void showGame();
     void increaseSpeed();
 };

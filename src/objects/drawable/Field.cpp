@@ -58,7 +58,7 @@ void Field::moveAllFiguresDownFrom(int y) {
 			std::swap(m_field[i][j], m_field[i - 1][j]);
 }
 
-void Field::deleteLines() {
+bool Field::shouldAnyLineBeDeleted() {
 	int linesToDelete = 0;
 	for (int i = 0; i < m_height; i++) {
 		bool shouldLineBeDeleted = true;
@@ -69,12 +69,24 @@ void Field::deleteLines() {
 			}
 		}
 		if (shouldLineBeDeleted) {
-			for (int j = 0; j < m_width; j++) {
-				m_field[i][j].used = false;
-				m_field[i][j].color = 0;
-			}
-			moveAllFiguresDownFrom(i-- + 1);
+			m_field[i][0].toDelete = true;
 			m_pScore->increaseValue(linesToDelete++);
 		}
 	}
+	return linesToDelete;
+}
+
+void Field::deleteLinesAnimation(int j) {
+	for (int i = 0; i < m_height; i++) {
+		if (m_field[i][0].toDelete) {
+			if (j == m_width) {
+				m_field[i][0].toDelete = false;
+				moveAllFiguresDownFrom(i-- + 1);
+				continue;
+			}
+			m_field[i][j].used = false;
+			m_field[i][j].color = 0;
+		}
+	}
+	std::this_thread::sleep_for(std::chrono::milliseconds(50));
 }

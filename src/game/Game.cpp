@@ -5,7 +5,7 @@ Game::Game(GLFWwindow* _window, size_t width, size_t height) : window(_window), 
     glfwSetKeyCallback(window, keysCallback);
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
-    srand(time(NULL));
+    srand(std::time(NULL));
     loadResources();
     start();
 }
@@ -19,6 +19,7 @@ void Game::start() {
     m_speed.setValue(1);
     fallenFiguresCounter = 0;
     delay = 1000;
+    m_currentGameState = EGameState::figureIsFalling;
 }
 
 void Game::run() {
@@ -30,41 +31,13 @@ void Game::run() {
     shaderProgramMap["sprite"]->setMatrix4("projectionMat", projectionMatrix);
 
     Renderer::clearColor(0.2f, 0.2f, 0.2f, 1.0f);
-    int nextColor = m_figureManager.genNextColor();
-    int nextFigure = m_figureManager.genNextFigure(nextColor);
 
-    float timer = 0.f;
+    nextColor = m_figureManager.genNextColor();
+    m_figureManager.genNextFigure(nextColor);
     
     while (!glfwWindowShouldClose(window)) {
-        if (m_figureManager.isGameOver()) {
-            start();
-        }
-        Renderer::clear();
-
         glfwPollEvents();
-
-        float time = clock.getElapsedTime();
-        clock.restart();
-        timer += time;
-
-        if (timer > delay) {
-            handleKey(GLFW_KEY_DOWN, GLFW_PRESS);
-            timer = 0.f;
-        }
-
-        if (m_figureManager.shouldNewFigureBeSpawned()) {
-            m_field.deleteLines();
-            increaseSpeed();
-            if (m_score > m_highScore) {
-                m_highScore.setValue(m_score.getValue());
-                m_highScore.writeScoreToFile();
-            }
-            m_figureManager.spawnNextFigure(nextFigure, nextColor);
-            nextColor = m_figureManager.genNextColor();
-            nextFigure = m_figureManager.genNextFigure(nextColor);
-            m_figureManager.setShouldNewFigureBeSpawned(false);
-        }
-
+        update();
         showGame();
         glfwSwapBuffers(window);
     }
@@ -102,13 +75,65 @@ void Game::handleKey(int key, int action) {
     }
 }
 
-void Game::showGame() {
-    m_field.render();
-    m_text.render();
-    m_score.render();
-    m_highScore.render();
-    m_speed.render();
-    m_miniScreen.render();
+void Game::update() {
+    switch (m_currentGameState)
+    {
+    case Game::EGameState::figureIsFalling:
+        if (m_figureManager.isGameOver()) {
+            start();
+        }
+        Renderer::clear();
+
+        time = clock.getElapsedTime();
+        clock.restart();
+        timer += time;
+
+        if (timer > delay) {
+            handleKey(GLFW_KEY_DOWN, GLFW_PRESS);
+            timer = 0.f;
+        }
+
+        if (m_figureManager.shouldNewFigureBeSpawned()) {
+            if (m_field.shouldAnyLineBeDeleted()) {
+                m_currentGameState = EGameState::lineIsDeleting;
+            }
+            else {
+                m_figureManager.setShouldNewFigureBeSpawned(false);
+                spawnNewFigureAndGenerateNext();
+            }
+        }
+        break;
+
+    case Game::EGameState::lineIsDeleting:
+        if (m_figureManager.shouldNewFigureBeSpawned()) {
+            if (m_score > m_highScore) {
+                m_highScore.setValue(m_score.getValue());
+                m_highScore.writeScoreToFile();
+            }
+            m_figureManager.setShouldNewFigureBeSpawned(false);
+            shouldLineDeletionAnimationStart = true;
+        }
+        else if (shouldLineDeletionAnimationStart) {
+            static int j = 0;
+            m_field.deleteLinesAnimation(j++);
+            if (j > m_field.getWidth()) {
+                shouldLineDeletionAnimationStart = false;
+                j = 0;
+            }
+        }
+        else {
+            spawnNewFigureAndGenerateNext();
+            m_currentGameState = EGameState::figureIsFalling;
+        }
+        break;
+    }
+}
+
+void Game::spawnNewFigureAndGenerateNext() {
+    m_figureManager.spawnNextFigure(nextFigure, nextColor);
+    nextColor = m_figureManager.genNextColor();
+    nextFigure = m_figureManager.genNextFigure(nextColor);
+    increaseSpeed();
 }
 
 void Game::increaseSpeed() {
@@ -116,6 +141,15 @@ void Game::increaseSpeed() {
         delay *= 0.8f;
         m_speed.increaseValue(1);
     }
+}
+
+void Game::showGame() {
+    m_field.render();
+    m_text.render();
+    m_score.render();
+    m_highScore.render();
+    m_speed.render();
+    m_miniScreen.render();
 }
 
 void Game::loadResources() {
