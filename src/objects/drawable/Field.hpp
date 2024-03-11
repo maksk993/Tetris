@@ -24,6 +24,7 @@ public:
     void moveAllFiguresDownFrom(int y);
     bool shouldAnyLineBeDeleted();
     void deleteLinesAnimation(int j);
+    void markAllLinesToDelete();
 
     size_t getWidth() { return m_width; }
     size_t getHeight() { return m_height; }

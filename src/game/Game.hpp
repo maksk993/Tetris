@@ -76,7 +76,7 @@ private:
     int nextFigure = 0;
     bool shouldLineDeletionAnimationStart = false;
 
-    enum class EGameState { figureIsFalling, lineIsDeleting };
+    enum class EGameState { figureIsFalling, lineIsDeleting, gameIsRestarting };
     EGameState m_currentGameState;
 
     void loadResources();
