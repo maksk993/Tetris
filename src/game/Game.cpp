@@ -35,7 +35,6 @@ void Game::run() {
     m_figureManager.genNextFigure(nextColor);
     
     while (!glfwWindowShouldClose(window)) {
-        glfwPollEvents();
         update();
         showGame();
         glfwSwapBuffers(window);
@@ -83,6 +82,7 @@ void Game::update() {
             m_currentGameState = EGameState::gameIsRestarting;
             break;
         }
+        glfwPollEvents();
 
         time = clock.getElapsedTime();
         clock.restart();
@@ -105,6 +105,7 @@ void Game::update() {
         break;
 
     case Game::EGameState::lineIsDeleting:
+        glfwPollEvents();
         if (m_figureManager.shouldNewFigureBeSpawned()) {
             if (m_score > m_highScore) {
                 m_highScore.setValue(m_score.getValue());
